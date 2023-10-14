@@ -3,16 +3,23 @@ import os
 import cv2
 import numpy as np
 from pathlib import Path
+from util import read_16bit_png
 
 def main():
     root = Path("./SimpleCube++/train/PNG/")
     images = os.listdir(root)
     idx = 5
-    image = cv2.imread(os.path.join(root,images[idx]), cv2.IMREAD_UNCHANGED)
-    image = linearize(cv2.cvtColor(image, cv2.COLOR_BGR2RGB).astype(np.float64))
+    image_path = os.path.join(root,images[idx])
+    image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
+    
+    print("by cv2:")
+    print(image)
+    print(image.shape)
 
-    cv2.imshow('window', image)
-    cv2.waitKey(0)
+    image = read_16bit_png(image_path).permute(1,2,0)
+    print("by torch:")
+    print(image)
+    print(image.shape)
 
 
 

@@ -15,7 +15,7 @@ import pandas as pd
 from pathlib import Path
 from torch.utils.data import Dataset
 from torchvision import transforms
-from util import read_16bit_png, MaxResize
+from util import read_16bit_png, MaxResize, Normalize
 
 class CustomDataset(Dataset):
     def __init__(self, data_dir, label_file, transform=None):
@@ -24,9 +24,9 @@ class CustomDataset(Dataset):
         self.images = os.listdir(self.images_dir)
         self.transform = transforms.Compose([
             MaxResize(1200),
-            transforms.CenterCrop(32)]
+            transforms.CenterCrop(32),
+            Normalize()]
         )
-
 
     def __getitem__(self, idx):
         image = read_16bit_png(os.path.join(self.images_dir,self.images[idx]))

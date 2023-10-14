@@ -33,15 +33,11 @@ class CCCNN(nn.Module):
         '''
         x = self.conv(x) # 32x32x240
         x = F.max_pool2d(x, kernel_size=8, stride=8) # 4x4x240
-        print("after max pool:", x)
         x = x.view(-1, 3840) #3840
-        print("after reshape:", x)
         x = self.fc1(x)
-        print("after fc1:", x)
         x = F.relu(x)
-        print("after ReLU:", x)
         x = self.fc2(x)
-        print("after fc2:", x)
+        
         return x
 
         

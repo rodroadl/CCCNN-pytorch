@@ -13,6 +13,7 @@ import logging
 import os
 import copy
 from tqdm import tqdm
+import matplotlib.pyplot as plt
 
 # torch 
 import torch
@@ -45,11 +46,12 @@ def main():
     if not os.path.exists(args.outputs_dir): os.makedirs(args.outputs_dir)
 
     # set up device, instantiate the SRCNN model, set up criterion and optimizer
-    cudnn.benchmark = True
+    # cudnn.benchmark = True
+    cudnn.deterministic = True
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     torch.manual_seed(args.seed)
     model = CCCNN().to(device)
-    criterion = nn.MSELoss() # NOTE: check, euclidean loss?
+    criterion = nn.MSELoss(reduction="sum") # NOTE: check, euclidean loss?
     optimizer = optim.Adam([
         {'params': model.conv.parameters()},
         {'params': model.fc1.parameters()},
@@ -83,6 +85,8 @@ def main():
     best_weights = copy.deepcopy(model.state_dict())
     best_epoch = 0
     best_loss = float('inf')
+    train_loss_log = list()
+    eval_loss_log = list()
 
     # start the training
     
@@ -99,6 +103,7 @@ def main():
                 preds = model(inputs)
                 print("training", preds,labels)
                 loss = criterion(preds,labels)
+                train_loss_log.append(loss.item())
                 optimizer.zero_grad()
                 loss.backward()
                 optimizer.step()
@@ -113,12 +118,13 @@ def main():
                 inputs, labels = batch
                 inputs = inputs.to(device)
                 labels = labels.to(device)
-                with torch.no_grad(): preds = model(inputs).clamp(0.,1.)
+                with torch.no_grad(): preds = model(inputs)
                 curr_loss += angularLoss(preds, labels)
                 eval_pbar.update(args.batch_size)
-                print(curr_loss)
-            curr_loss /= len(eval_dataloader)
-            print('eval angular loss: {:.2f}'.format(curr_loss))
+                print('eval batch loss: {:.2f}'.format(curr_loss.item()))
+            curr_loss = curr_loss*len(eval_dataloader)/len(eval_dataset)
+            eval_loss_log.append(curr_loss.item())
+            print('eval round loss: {:.2f}'.format(curr_loss))
 
             # update best parameters and values
             if best_loss > curr_loss:
@@ -126,7 +132,14 @@ def main():
                 best_loss = curr_loss
                 best_weights = copy.deepcopy(model.state_dict())
     print('best epoch: {}, angular loss: {:.2f}'.format(best_epoch, best_loss))
-    torch.save(best_weights, os.path.join(args.outputs_dir, 'best.pth'))    
+    torch.save(best_weights, os.path.join(args.outputs_dir, 'best.pth'))
+
+    plt.figure()
+    plt.subplot(211)
+    plt.plot(range(len(train_dataloader) * epoch), train_loss_log)
+    plt.subplot(212)
+    plt.plot(range(epoch), eval_loss_log)
+    plt.show()
 
 if __name__ == "__main__":
     main()

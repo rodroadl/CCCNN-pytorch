@@ -10,8 +10,7 @@ def read_16bit_png(file):
 def angularLoss(xs, ys):
     output = 0
     for x, y in zip(xs, ys):
-        print(x, y)
-        output += torch.arccos(torch.dot(x,y) / torch.linalg.vector_norm(x) /torch.linalg.vector_norm(y))
+        output += torch.arccos(torch.nn.functional.cosine_similarity(x,y, dim=0)).item()
     return output/xs.size(0)
 
 def linearize(img, black_lvl=0, saturation_lvl=2**16-1):
@@ -39,3 +38,9 @@ class MaxResize:
             w0 = math.ceil(self.max_length / ratio)
             return F.resize(img, (w0, self.max_length))
 
+class Normalize:
+    def __init__(self, black_lvl=2048, saturation_lvl=2**14-1):
+        self.black_lvl = black_lvl
+        self.saturation_lvl = saturation_lvl
+    def __call__(self, img):
+        return (img-self.black_lvl)/(self.saturation_lvl-self.black_lvl)
