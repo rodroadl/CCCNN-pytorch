@@ -101,7 +101,6 @@ def main():
                 inputs = inputs.to(device)
                 labels = labels.to(device)
                 preds = model(inputs)
-                print("training", preds,labels)
                 loss = criterion(preds,labels)
                 train_loss_log.append(loss.item())
                 optimizer.zero_grad()
@@ -123,6 +122,7 @@ def main():
                 round_loss += batch_loss
                 eval_pbar.update(args.batch_size)
                 print('eval batch loss: {:.2f}'.format(batch_loss/len(batch)))
+                print('accumulated round loss: {:.2f}'.format(round_loss))
             round_loss /= len(eval_dataset)
             eval_loss_log.append(round_loss)
             print('eval round loss: {:.2f}'.format(round_loss))

@@ -10,7 +10,7 @@ def read_16bit_png(file):
 def angularLoss(xs, ys):
     output = 0
     for x, y in zip(xs, ys):
-        output += torch.arccos(torch.nn.functional.cosine_similarity(x,y, dim=0)).item()
+        output += math.degrees(torch.arccos(torch.nn.functional.cosine_similarity(x,y, dim=0)).item())
     return output
 
 def linearize(img, black_lvl=0, saturation_lvl=2**16-1):
