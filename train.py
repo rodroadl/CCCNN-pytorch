@@ -46,8 +46,8 @@ def main():
     if not os.path.exists(args.outputs_dir): os.makedirs(args.outputs_dir)
 
     # set up device, instantiate the SRCNN model, set up criterion and optimizer
-    # cudnn.benchmark = True
-    cudnn.deterministic = True
+    cudnn.benchmark = True
+    # cudnn.deterministic = True
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     torch.manual_seed(args.seed)
     model = CCCNN().to(device)
@@ -121,8 +121,6 @@ def main():
                 batch_loss = angularLoss(preds, labels)
                 round_loss += batch_loss
                 eval_pbar.update(args.batch_size)
-                print('eval batch loss: {:.2f}'.format(batch_loss/len(batch)))
-                print('accumulated round loss: {:.2f}'.format(round_loss))
             round_loss /= len(eval_dataset)
             eval_loss_log.append(round_loss)
             print('eval round loss: {:.2f}'.format(round_loss))

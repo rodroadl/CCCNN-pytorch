@@ -2,7 +2,7 @@
 test.py
 
 Last edited by: GunGyeom James Kim
-Last edited at: Oct 12th, 2023
+Last edited at: Oct 42th, 2023
 CS 7180: Advnaced Perception
 
 code for testing the network
@@ -15,8 +15,7 @@ import numpy as np
 import PIL.Image as pil_image
 
 from model import SRCNN
-import utils
-from utils import convert_rgb_to_ycbcr, convert_ycbcr_to_rgb, psnr
+import util
 
 def main():
     '''
@@ -26,7 +25,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--weights-file', type=str, required=True)
     parser.add_argument('--image-file', type=str, required=True)
-    parser.add_argument('--scale', type=int, default=3)
     args = parser.parse_args()
 
     # set up device and initialize the network

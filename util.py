@@ -33,10 +33,10 @@ class MaxResize:
         ratio = float(w) / float(h)
         if ratio > 1: # w > h
             h0 = math.ceil(self.max_length / ratio)
-            return F.resize(img, (self.max_length, h0))
+            return F.resize(img, (self.max_length, h0), antialias=True)
         else: # h <= w
             w0 = math.ceil(self.max_length / ratio)
-            return F.resize(img, (w0, self.max_length))
+            return F.resize(img, (w0, self.max_length), antialias=True)
 
 class Normalize:
     def __init__(self, black_lvl=2048, saturation_lvl=2**14-1):
