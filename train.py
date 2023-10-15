@@ -113,32 +113,33 @@ def main():
             eval_pbar.set_description('eval round:')
             # start the evaluation
             model.eval()
-            curr_loss = 0
+            round_loss = 0
             for batch in eval_dataloader:
                 inputs, labels = batch
                 inputs = inputs.to(device)
                 labels = labels.to(device)
                 with torch.no_grad(): preds = model(inputs)
-                curr_loss += angularLoss(preds, labels)
+                batch_loss = angularLoss(preds, labels)
+                round_loss += batch_loss
                 eval_pbar.update(args.batch_size)
-                print('eval batch loss: {:.2f}'.format(curr_loss.item()))
-            curr_loss = curr_loss*len(eval_dataloader)/len(eval_dataset)
-            eval_loss_log.append(curr_loss.item())
-            print('eval round loss: {:.2f}'.format(curr_loss))
+                print('eval batch loss: {:.2f}'.format(batch_loss/len(batch)))
+            round_loss /= len(eval_dataset)
+            eval_loss_log.append(round_loss)
+            print('eval round loss: {:.2f}'.format(round_loss))
 
             # update best parameters and values
-            if best_loss > curr_loss:
+            if best_loss > round_loss:
                 best_epoch = epoch
-                best_loss = curr_loss
+                best_loss = round_loss
                 best_weights = copy.deepcopy(model.state_dict())
     print('best epoch: {}, angular loss: {:.2f}'.format(best_epoch, best_loss))
     torch.save(best_weights, os.path.join(args.outputs_dir, 'best.pth'))
 
     plt.figure()
     plt.subplot(211)
-    plt.plot(range(len(train_dataloader) * epoch), train_loss_log)
+    plt.plot(range(len(train_loss_log)), train_loss_log)
     plt.subplot(212)
-    plt.plot(range(epoch), eval_loss_log)
+    plt.plot(range(len(eval_loss_log)), eval_loss_log)
     plt.show()
 
 if __name__ == "__main__":

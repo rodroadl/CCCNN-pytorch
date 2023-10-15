@@ -11,7 +11,7 @@ def angularLoss(xs, ys):
     output = 0
     for x, y in zip(xs, ys):
         output += torch.arccos(torch.nn.functional.cosine_similarity(x,y, dim=0)).item()
-    return output/xs.size(0)
+    return output
 
 def linearize(img, black_lvl=0, saturation_lvl=2**16-1):
     return torch.clip((img - black_lvl)/(saturation_lvl - black_lvl), 0, 1)

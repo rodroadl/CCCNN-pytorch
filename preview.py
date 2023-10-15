@@ -12,13 +12,13 @@ def main():
     image_path = os.path.join(root,images[idx])
     image = cv2.imread(image_path, cv2.IMREAD_UNCHANGED)
     
-    print("by cv2:")
-    print(image)
+    print("by cv2:") 
+    print(image) # BGR
     print(image.shape)
 
     image = read_16bit_png(image_path).permute(1,2,0)
     print("by torch:")
-    print(image)
+    print(image) # RGB
     print(image.shape)
 
 
