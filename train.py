@@ -33,6 +33,7 @@ def main():
     '''
     # setting up argumentparser
     parser = argparse.ArgumentParser()
+    parser.add_argument('--log-space', type=bool, default=False)
     parser.add_argument('--train-file', type=str, required=True)
     parser.add_argument('--eval-file', type=str, required=True)
     parser.add_argument('--outputs-dir', type=str, required=True)
@@ -68,8 +69,8 @@ def main():
     ''')
 
     # configure datasets and dataloaders
-    train_dataset = CustomDataset(args.train_file, "./SimpleCube++/train/gt.csv")
-    eval_dataset = CustomDataset(args.eval_file, "./SimpleCube++/test/gt.csv")
+    train_dataset = CustomDataset(args.train_file, "./SimpleCube++/train/gt.csv", log_space=args.log_space)
+    eval_dataset = CustomDataset(args.eval_file, "./SimpleCube++/test/gt.csv", log_space=args.log_space)
     train_dataloader = DataLoader(dataset=train_dataset,
                                   batch_size=args.batch_size,
                                   shuffle=True,
@@ -118,7 +119,7 @@ def main():
                 inputs = inputs.to(device)
                 labels = labels.to(device)
                 with torch.no_grad(): preds = model(inputs)
-                batch_loss = angularLoss(preds, labels)
+                batch_loss = angularLoss(preds, labels) if not args.log_space else angularLoss(torch.exp(preds), torch.exp(labels))
                 round_loss += batch_loss
                 eval_pbar.update(args.batch_size)
             round_loss /= len(eval_dataset)

@@ -38,9 +38,13 @@ class MaxResize:
             w0 = math.ceil(self.max_length / ratio)
             return F.resize(img, (w0, self.max_length), antialias=True)
 
-class Normalize:
+class Linearize:
     def __init__(self, black_lvl=2048, saturation_lvl=2**14-1):
         self.black_lvl = black_lvl
         self.saturation_lvl = saturation_lvl
     def __call__(self, img):
         return (img-self.black_lvl)/(self.saturation_lvl-self.black_lvl)
+
+class Logarithm:
+    def __call__(self, img):
+        return torch.log(img)
