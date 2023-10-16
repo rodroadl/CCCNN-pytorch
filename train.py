@@ -33,9 +33,11 @@ def main():
     '''
     # setting up argumentparser
     parser = argparse.ArgumentParser()
-    parser.add_argument('--log-space', type=bool, default=False)
-    parser.add_argument('--train-file', type=str, required=True)
-    parser.add_argument('--eval-file', type=str, required=True)
+    parser.add_argument('--log-space', default=False, action='store_true')
+    parser.add_argument('--train-images-dir', type=str, required=True)
+    parser.add_argument('--train-labels-file', type=str, required=True)
+    parser.add_argument('--eval-images-dir', type=str, required=True)
+    parser.add_argument('--eval-labels-file', type=str, required=True)
     parser.add_argument('--outputs-dir', type=str, required=True)
     parser.add_argument('--lr', type=float, default=1e-4)
     parser.add_argument('--batch-size', type=int, default=256)
@@ -62,7 +64,7 @@ def main():
     # (Initialize logging)
     logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
     logging.info(f'''Starting training:
-        Space:          {"Log space" if args.log_space else "Linear"}
+        Space:          {"Log space" if args.log_space else "Linear space"}
         Epoch:          {args.num_epochs}
         Batch size:     {args.batch_size}
         Learning rate:  {args.lr}
@@ -70,8 +72,8 @@ def main():
     ''')
 
     # configure datasets and dataloaders
-    train_dataset = CustomDataset(args.train_file, "./SimpleCube++/train/gt.csv", log_space=args.log_space)
-    eval_dataset = CustomDataset(args.eval_file, "./SimpleCube++/test/gt.csv", log_space=args.log_space)
+    train_dataset = CustomDataset(args.train_images_dir, args.train_labels_file, log_space=args.log_space)
+    eval_dataset = CustomDataset(args.eval_images_dir, args.eval_labels_file, log_space=args.log_space)
     train_dataloader = DataLoader(dataset=train_dataset,
                                   batch_size=args.batch_size,
                                   shuffle=True,

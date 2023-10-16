@@ -43,7 +43,7 @@ class Linearize:
         self.black_lvl = black_lvl
         self.saturation_lvl = saturation_lvl
     def __call__(self, img):
-        return (img-self.black_lvl)/(self.saturation_lvl-self.black_lvl)
+        return torch.clip((img - self.black_lvl)/(self.saturation_lvl - self.black_lvl), 0, 1)
 
 class Logarithm:
     def __call__(self, img):

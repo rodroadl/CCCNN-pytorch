@@ -33,7 +33,7 @@ class CustomDataset(Dataset):
         label = torch.tensor(self.labels.iloc[idx, 1:4].astype(float).values, dtype=torch.float32) 
         
         if self.transform: image = self.transform(image)
-        if self.log_space: image, label = torch.log(image), torch.log(label)
+        if self.log_space: image, label = torch.log(image+1e-7), torch.log(label)
         image = image.type(torch.float32) # necessary?
         return image, label
     

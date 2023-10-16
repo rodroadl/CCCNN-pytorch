@@ -58,7 +58,6 @@ def main():
         inputs = inputs.to(device)
         labels = labels.to(device)
         with torch.no_grad(): preds = model(inputs)
-        batch_loss = angularLoss(preds, labels)
 
     # save the output of SRCNN
     preds = preds.mul(255.).cpu().numpy().squeeze(0).squeeze(0)
