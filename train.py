@@ -2,7 +2,7 @@
 train.py
 
 Last edited by: GunGyeom James Kim
-Last edited at: Oct 12th, 2023
+Last edited at: Oct 16th, 2023
 CS 7180: Advnaced Perception
 
 code for training the network
@@ -62,6 +62,7 @@ def main():
     # (Initialize logging)
     logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
     logging.info(f'''Starting training:
+        Space:          {"Log space" if args.log_space else "Linear"}
         Epoch:          {args.num_epochs}
         Batch size:     {args.batch_size}
         Learning rate:  {args.lr}

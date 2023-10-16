@@ -2,11 +2,11 @@
 dataset.py
 
 Last edited by: GunGyeom James Kim
-Last edited at: Oct 12th, 2023
+Last edited at: Oct 16th, 2023
 CS 7180: Advnaced Perception
 
 Custom dataset
-Resize as max(w,h) = 120 and sampling 32x32 patchs from the image as paper describe
+Resize as max(w,h) = 1200 and sampling 32x32 patchs from the image as paper describe
 '''
 
 import os
@@ -33,7 +33,7 @@ class CustomDataset(Dataset):
         label = torch.tensor(self.labels.iloc[idx, 1:4].astype(float).values, dtype=torch.float32) 
         
         if self.transform: image = self.transform(image)
-        if self.log_space: image, label = torch.exp(image), torch.exp(label)
+        if self.log_space: image, label = torch.log(image), torch.log(label)
         image = image.type(torch.float32) # necessary?
         return image, label
     
