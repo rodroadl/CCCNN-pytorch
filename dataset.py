@@ -15,7 +15,7 @@ import pandas as pd
 from pathlib import Path
 from torch.utils.data import Dataset
 from torchvision import transforms
-from util import read_16bit_png, MaxResize, Linearize, Logarithm
+from util import read_16bit_png, MaxResize, Linearize
 
 class CustomDataset(Dataset):
     def __init__(self, data_dir, label_file, transform=None, log_space=False):
@@ -33,7 +33,7 @@ class CustomDataset(Dataset):
         label = torch.tensor(self.labels.iloc[idx, 1:4].astype(float).values, dtype=torch.float32) 
         
         if self.transform: image = self.transform(image)
-        if self.log_space: image, label = torch.log(image+1e-7), torch.log(label)
+        if self.log_space: image, label = torch.log(image+1e-7), torch.log(label+1e-7)
         image = image.type(torch.float32) # necessary?
         return image, label
     
