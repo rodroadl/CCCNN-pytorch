@@ -18,7 +18,7 @@ from torchvision import transforms
 from util import read_16bit_png, MaxResize, Linearize
 
 class CustomDataset(Dataset):
-    def __init__(self, data_dir, label_file, transform=None, log_space=False, num_patches=None):
+    def __init__(self, data_dir, label_file, transform=None, log_space=False, num_patches=1):
         self.images_dir = Path(data_dir)
         self.labels = pd.read_csv(label_file)
         self.images = os.listdir(self.images_dir)
@@ -41,8 +41,8 @@ class CustomDataset(Dataset):
             label = torch.log(label+eps)
             # image, label = torch.log(image+1e-7), torch.log(label+1e-7)
         image = image.type(torch.float32) # necessary?
-        if self.num_patchs > 1: 
-            return
+        if self.num_patches > 1: 
+            return image, label
         else:
             return image, label
     
