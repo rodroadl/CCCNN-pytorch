@@ -45,6 +45,33 @@ class Linearize:
     def __call__(self, img):
         return torch.clip((img - self.black_lvl)/(self.saturation_lvl - self.black_lvl), 0, 1)
 
-class Logarithm:
+class RandomPatches:
+    def __init__(self, patch_size, num_patches, mask_coord=None):
+        self.patch_size = patch_size
+        self.num_patches = num_patches
+        self.mask_coord = mask_coord
+
     def __call__(self, img):
-        return torch.log(img)
+        _, w, h = img.size()
+        left_upper, right_upper, right_lower, left_lower = self.mask_coord
+        taken = list() # Rectangle: left_upper -> right_upper -> right_lower -> left_lower
+        for _ in range(self.patch_size):
+            flag = True
+            i = 0
+            while flag and taken:
+                x0, y0 = torch.randint(low=16,high=w-15), torch.randint(low=16,high=h-15)
+                x, y = taken[i]
+                flag = math.abs(x, x0) > 16 and math.abs(y,y0) > 16 # NOTE: check whether it overlaps mask
+                i += 1
+            taken.append((x0,y0))
+
+        patchs = []
+        for x,y in taken:
+            patch = img[:,x-16:x+16,y-16:y+16]
+            patchs.append(patch)
+            
+        return patchs
+
+class ConstancyNormalize:
+    def __call__(self, img):
+        return img
