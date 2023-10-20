@@ -121,18 +121,20 @@ def main():
             # start the evaluation
             model.eval()
             round_loss = 0
+            num_patches = 0
             for batch in eval_dataloader:
                 inputs, labels = batch
                 if args.num_patches > 1:
                     inputs = torch.flatten(inputs, start_dim=0, end_dim=1) #[batch size, num_patches, ...] -> [batch size * num_patches, ...] / NOTE: optimize?
                     labels = torch.flatten(labels, start_dim=0, end_dim=1)
+                num_patches += inputs.shape[0]
                 inputs = inputs.to(device)
                 labels = labels.to(device)
                 with torch.no_grad(): preds = model(inputs)
                 batch_loss = angularLoss(preds, labels) if not args.log_space else angularLoss(torch.exp(preds), torch.exp(labels))
                 round_loss += batch_loss
                 eval_pbar.update(args.batch_size)
-            round_loss /= len(eval_dataset)
+            round_loss /= num_patches
             eval_loss_log.append(round_loss)
             print('eval round loss: {:.2f}'.format(round_loss))
 
