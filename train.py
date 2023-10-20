@@ -24,7 +24,7 @@ from torch.utils.data import DataLoader
 
 # custom
 from model import CCCNN
-from dataset import TrainDataset, EvalDataset
+from dataset import CustomDataset
 from util import angularLoss
 
 def main():
@@ -73,8 +73,8 @@ def main():
     ''')
 
     # configure datasets and dataloaders
-    train_dataset = TrainDataset(args.train_images_dir, args.train_labels_file, log_space=args.log_space, num_patches=args.num_patches)
-    eval_dataset = EvalDataset(args.eval_images_dir, args.eval_labels_file, log_space=args.log_space)
+    train_dataset = CustomDataset(args.train_images_dir, args.train_labels_file, log_space=args.log_space, num_patches=args.num_patches)
+    eval_dataset = CustomDataset(args.eval_images_dir, args.eval_labels_file, log_space=args.log_space, num_patches=args.num_patches)
     train_dataloader = DataLoader(dataset=train_dataset,
                                   batch_size=args.batch_size,
                                   shuffle=True,
@@ -123,6 +123,9 @@ def main():
             round_loss = 0
             for batch in eval_dataloader:
                 inputs, labels = batch
+                if args.num_patches > 1:
+                    inputs = torch.flatten(inputs, start_dim=0, end_dim=1) #[batch size, num_patches, ...] -> [batch size * num_patches, ...] / NOTE: optimize?
+                    labels = torch.flatten(labels, start_dim=0, end_dim=1)
                 inputs = inputs.to(device)
                 labels = labels.to(device)
                 with torch.no_grad(): preds = model(inputs)

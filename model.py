@@ -27,7 +27,7 @@ class CCCNN(nn.Module):
         Return the output estimated by the network
 
         Parameters:
-            x - 32x32x3 image patch
+            x - 3x32x32 image patch
         Return:
             x - estimated output
         '''
