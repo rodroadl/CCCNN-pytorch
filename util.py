@@ -1,5 +1,5 @@
 import math 
-from random import randint
+from random import randint, choice
 
 import torch
 from torchvision.io import read_file
@@ -62,23 +62,24 @@ class RandomPatches:
         else:
             h, w, _ = img.shape
         # left_upper, right_upper, right_lower, left_lower = self.mask_coord #(182,473)
-        center = set()
-        exception = set()
+        coords = set()
+        for row in h:
+            for col in w:
+                if (row < h-radius-250 or col < w-radius-175): coords.add((row, col)) 
+
+        center = list()
         diameter = self.patch_size
         radius = self.patch_size // 2
         for _ in range(self.num_patches):
             valid = False
             while not valid:
-                y0, x0 = randint(radius,h-radius), randint(radius,w-radius)
-                valid = (y0 < h - radius or x0 < w - radius) and (y0,x0) not in center and not (y0,x0) in exception
+                y0, x0 = choice(coords)
+                coords.remove((y0, x0))
                 for y, x in center:
                     if not valid: break
                     valid &= abs(y-y0) > diameter and abs(x-x0) > diameter
                 # termination: valid=False or (valid=True and i = len(taken))
-            if valid: 
-                center.add((y0,x0))
-            else:
-                exception.add((y0,x0))
+            if valid: center.append((y0,x0))
 
         patches = []
         for x,y in center:
