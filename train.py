@@ -24,7 +24,7 @@ from torch.utils.data import DataLoader
 
 # custom
 from model import CCCNN
-from dataset import CustomDataset
+from dataset import TrainDataset, EvalDataset
 from util import angularLoss
 
 def main():
@@ -73,8 +73,8 @@ def main():
     ''')
 
     # configure datasets and dataloaders
-    train_dataset = CustomDataset(args.train_images_dir, args.train_labels_file, log_space=args.log_space, num_patches=args.num_patches)
-    eval_dataset = CustomDataset(args.eval_images_dir, args.eval_labels_file, log_space=args.log_space, num_patches = 1)
+    train_dataset = TrainDataset(args.train_images_dir, args.train_labels_file, log_space=args.log_space, num_patches=args.num_patches)
+    eval_dataset = EvalDataset(args.eval_images_dir, args.eval_labels_file, log_space=args.log_space)
     train_dataloader = DataLoader(dataset=train_dataset,
                                   batch_size=args.batch_size,
                                   shuffle=True,

@@ -50,7 +50,7 @@ class ContrastNormalization: # Contrast normalization - Global Histogram stretch
         return (img - self.black_lvl)/(saturation_lvl - self.black_lvl)
 
 class RandomPatches:
-    def __init__(self, patch_size, num_patches):
+    def __init__(self, patch_size, num_patches=1):
         self.patch_size = patch_size
         self.num_patches = num_patches
 
