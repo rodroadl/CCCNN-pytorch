@@ -17,7 +17,7 @@ from torch.utils.data import Dataset
 from torchvision import transforms
 from util import read_16bit_png, MaxResize, ContrastNormalization, RandomPatches
 
-class TrainDataset(Dataset):
+class CustomDataset(Dataset):
     def __init__(self, data_dir, label_file, transform=None, log_space=False, num_patches=1):
         self.images_dir = Path(data_dir)
         self.labels = pd.read_csv(label_file)
