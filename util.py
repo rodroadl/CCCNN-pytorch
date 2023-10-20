@@ -50,23 +50,22 @@ class ContrastNormalization: # Contrast normalization - Global Histogram stretch
         return (img - self.black_lvl)/(saturation_lvl - self.black_lvl)
 
 class RandomPatches:
-    def __init__(self, patch_size, num_patches, mask_coord=None):
+    def __init__(self, patch_size, num_patches):
         self.patch_size = patch_size
         self.num_patches = num_patches
-        self.mask_coord = mask_coord
 
     def __call__(self, img):
-        _, h, w = img.size()
-        # left_upper, right_upper, right_lower, left_lower = self.mask_coord #(182,473)
-        
+        MASK_HEIGHT = 250
+        MASK_WIDTH = 175
+        _, h, w = img.size()        
         diameter = self.patch_size
         radius = self.patch_size // 2
         coords = set()
         center = list()
 
-        for row in range(h):
-            for col in range(w):
-                if (row < h-radius-250 or col < w-radius-175): coords.add((row, col)) 
+        for row in range(radius, h-radius):
+            for col in range(radius, w-radius):
+                if (row < h-radius-MASK_HEIGHT or col < w-radius-MASK_WIDTH): coords.add((row, col)) 
 
         for _ in range(self.num_patches):
             valid = False
