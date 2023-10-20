@@ -74,7 +74,7 @@ class RandomPatches:
 
         for _ in range(self.num_patches):
             valid = False
-            while not valid:
+            while coords and not valid:
                 y0, x0 = sample(coords, 1)[0]
                 coords.remove((y0, x0))
                 for y, x in center:

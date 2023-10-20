@@ -43,7 +43,8 @@ class CustomDataset(Dataset):
             # image, label = torch.log(image+1e-7), torch.log(label+1e-7)
         image = image.type(torch.float32) # necessary?
         if self.num_patches > 1: 
-            return image, [label] * self.num_patches
+            num_image,_,_,_ = image.size()
+            return image, [label] * num_image
         else:
             return image, label
     
