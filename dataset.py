@@ -44,7 +44,7 @@ class CustomDataset(Dataset):
         
         if self.num_patches > 1: 
             num_image,_,_,_ = image.size()
-            return image, [label] * num_image
+            return image, torch.stack([label] * num_image, dim=0)
         else:
             image = image.type(torch.float32) # necessary?
             return image, label
