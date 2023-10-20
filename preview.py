@@ -34,8 +34,7 @@ def main():
     
     # print(image) # BGR
     # print(image.shape) -> (row, column): (432,648,3), width x height: 648x432
-    # right bottom rectangle width x height: 175x250 -> (232, 473)
-    # it looks like it is actually 175x250
+    # right bottom rectangle width x height: 175x250 -> (182, 473)
 
     cv2.imshow('cv2', image)
     # cv2.imwrite("PNG", image)
