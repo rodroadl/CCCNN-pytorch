@@ -81,7 +81,7 @@ class RandomPatches:
 
         patches = []
         for y,x in center:
-            patch = img[:, y-16:y+16, x-16:x+16]
+            patch = img[:, y-16:y+16, x-16:x+16].type(torch.float32)
             patches.append(patch)
         
-        return patches
+        return torch.tensor(patches)
