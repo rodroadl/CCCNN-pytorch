@@ -34,6 +34,7 @@ def main():
     # setting up argumentparser
     parser = argparse.ArgumentParser()
     parser.add_argument('--log-space', default=False, action='store_true')
+    parser.add_argument('--num-patches', type=int, default=1)
     parser.add_argument('--train-images-dir', type=str, required=True)
     parser.add_argument('--train-labels-file', type=str, required=True)
     parser.add_argument('--eval-images-dir', type=str, required=True)
@@ -72,7 +73,7 @@ def main():
     ''')
 
     # configure datasets and dataloaders
-    train_dataset = CustomDataset(args.train_images_dir, args.train_labels_file, log_space=args.log_space)
+    train_dataset = CustomDataset(args.train_images_dir, args.train_labels_file, log_space=args.log_space, num_patches=args.num_patches)
     eval_dataset = CustomDataset(args.eval_images_dir, args.eval_labels_file, log_space=args.log_space)
     train_dataloader = DataLoader(dataset=train_dataset,
                                   batch_size=args.batch_size,
@@ -101,7 +102,10 @@ def main():
             train_pbar.set_description('train epoch: {}/{}'.format(epoch, args.num_epochs - 1))
 
             for batch in train_dataloader:
-                inputs, labels = batch
+                if args.num_patches > 1:
+                    inputs, labels = torch.flatten(batch,start_dim=0, end_dim=1) #[batch size, num_patches, ...] -> [batch size * num_patches, ...]
+                else:
+                    inputs, labels = batch #[batch size, ...]
                 inputs = inputs.to(device)
                 labels = labels.to(device)
                 preds = model(inputs)

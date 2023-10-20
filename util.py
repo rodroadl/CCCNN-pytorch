@@ -1,4 +1,6 @@
 import math 
+from random import randint
+
 import torch
 from torchvision.io import read_file
 from torchvision.transforms import functional as F
@@ -13,7 +15,7 @@ def angularLoss(xs, ys):
         output += math.degrees(torch.arccos(torch.nn.functional.cosine_similarity(x,y, dim=0)).item())
     return output
 
-def linearize(img, black_lvl=0, saturation_lvl=2**16-1):
+def linearize(img, black_lvl=2048, saturation_lvl=2**14-1):
     return torch.clip((img - black_lvl)/(saturation_lvl - black_lvl), 0, 1)
 
 def linearize_expand(img, black_lvl=0, saturation_lvl=2**16-1):
@@ -23,6 +25,8 @@ def linearize_expand_log(img, black_lvl=0, saturation_lvl=2**16-1):
     x = torch.log(linearize_expand(img, black_lvl, saturation_lvl))
     x = torch.nn.functional.normalize(x)
     return torch.nan_to_num(x)
+
+### Transform 
 
 class MaxResize:
     def __init__(self, max_length):
@@ -38,12 +42,12 @@ class MaxResize:
             w0 = math.ceil(self.max_length / ratio)
             return F.resize(img, (w0, self.max_length), antialias=True)
 
-class Linearize:
-    def __init__(self, black_lvl=2048, saturation_lvl=2**14-1):
+class ContrastNormalization: # Contrast normalization - Global Histogram stretching
+    def __init__(self, black_lvl=2048):
         self.black_lvl = black_lvl
-        self.saturation_lvl = saturation_lvl
     def __call__(self, img):
-        return torch.clip((img - self.black_lvl)/(self.saturation_lvl - self.black_lvl), 0, 1)
+        saturation_lvl = torch.max(img)
+        return (img - self.black_lvl)/(saturation_lvl - self.black_lvl)
 
 class RandomPatches:
     def __init__(self, patch_size, num_patches, mask_coord=None):
@@ -52,26 +56,35 @@ class RandomPatches:
         self.mask_coord = mask_coord
 
     def __call__(self, img):
-        _, w, h = img.size()
-        left_upper, right_upper, right_lower, left_lower = self.mask_coord
-        taken = list() # Rectangle: left_upper -> right_upper -> right_lower -> left_lower
-        for _ in range(self.patch_size):
-            flag = True
-            i = 0
-            while flag and taken:
-                x0, y0 = torch.randint(low=16,high=w-15), torch.randint(low=16,high=h-15)
-                x, y = taken[i]
-                flag = math.abs(x, x0) > 16 and math.abs(y,y0) > 16 # NOTE: check whether it overlaps mask
-                i += 1
-            taken.append((x0,y0))
+        if torch.is_tensor(img):
+            _, h, w = img.size()
+        else:
+            h, w, _ = img.shape
+        # left_upper, right_upper, right_lower, left_lower = self.mask_coord #(182,473)
+        center = set()
+        exception = set()
+        diameter = self.patch_size
+        radius = self.patch_size // 2
+        for _ in range(self.num_patches):
+            valid = False
+            while not valid:
+                y0, x0 = randint(radius,h-radius), randint(radius,w-radius)
+                valid = (y0 < h - radius or x0 < w - radius) and (y0,x0) not in center and not (y0,x0) in exception
+                for y, x in center:
+                    if not valid: break
+                    valid &= abs(y-y0) > diameter and abs(x-x0) > diameter
+                # termination: valid=False or (valid=True and i = len(taken))
+            if valid: 
+                center.add((y0,x0))
+            else:
+                exception.add((y0,x0))
 
-        patchs = []
-        for x,y in taken:
-            patch = img[:,x-16:x+16,y-16:y+16]
-            patchs.append(patch)
+        patches = []
+        for x,y in center:
+            if torch.is_tensor(img):
+                patch = img[:, x-16:x+16, y-16:y+16]
+            else:
+                patch = img[x-16:x+16, y-16:y+16 , :]
+            patches.append(patch)
             
-        return patchs
-
-class ConstancyNormalize:
-    def __call__(self, img):
-        return img
+        return patches
