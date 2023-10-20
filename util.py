@@ -1,5 +1,5 @@
 import math 
-from random import randint, sample
+from random import sample
 
 import torch
 from torchvision.io import read_file
