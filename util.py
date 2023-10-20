@@ -56,7 +56,6 @@ class RandomPatches:
         self.mask_coord = mask_coord
 
     def __call__(self, img):
-        print("Sampling Random Patches")
         if torch.is_tensor(img):
             _, h, w = img.size()
         else:
@@ -91,5 +90,5 @@ class RandomPatches:
             else:
                 patch = img[x-16:x+16, y-16:y+16 , :]
             patches.append(patch)
-        print("Done")
+        
         return patches
