@@ -69,7 +69,7 @@ class RandomPatches:
         for _ in range(self.num_patches):
             valid = False
             while not valid:
-                y0, x0 = randint(radius,h-radius).item(), randint(radius,w-radius).item()
+                y0, x0 = randint(radius,h-radius), randint(radius,w-radius)
                 valid = (y0 < h - radius or x0 < w - radius) and (y0,x0) not in center and not (y0,x0) in exception
                 for y, x in center:
                     if not valid: break
