@@ -58,13 +58,9 @@ def main():
         inputs = inputs.to(device)
         labels = labels.to(device)
         with torch.no_grad(): preds = model(inputs)
-
+        batch_loss = angularLoss(preds, labels)
     # save the output of SRCNN
-    preds = preds.mul(255.).cpu().numpy().squeeze(0).squeeze(0)
-    output = np.array([preds, ycbcr[..., 1], ycbcr[..., 2]]).transpose([1,2,0])
-    output = np.clip(convert_ycbcr_to_rgb(output), 0., 255.).astype(np.uint8)
-    output = pil_image.fromarray(output)
-    output.save(args.image_file.replace('.', '_srcnn_x{}.'.format(args.scale)))
+
 
 if __name__ == '__main__':
     main()
