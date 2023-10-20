@@ -74,7 +74,7 @@ def main():
 
     # configure datasets and dataloaders
     train_dataset = CustomDataset(args.train_images_dir, args.train_labels_file, log_space=args.log_space, num_patches=args.num_patches)
-    eval_dataset = CustomDataset(args.eval_images_dir, args.eval_labels_file, log_space=args.log_space)
+    eval_dataset = CustomDataset(args.eval_images_dir, args.eval_labels_file, log_space=args.log_space, num_patches = 1)
     train_dataloader = DataLoader(dataset=train_dataset,
                                   batch_size=args.batch_size,
                                   shuffle=True,

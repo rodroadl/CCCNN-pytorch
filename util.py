@@ -55,6 +55,7 @@ class RandomPatches:
         self.num_patches = num_patches
 
     def __call__(self, img):
+        if self.num_patches == 1: return img
         MASK_HEIGHT = 250
         MASK_WIDTH = 175
         _, h, w = img.size()        
