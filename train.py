@@ -103,8 +103,8 @@ def main():
 
             for inputs, labels in train_dataloader:
                 if args.num_patches > 1:
-                    inputs = torch.flatten(torch.stack(inputs, dim=0), start_dim=0, end_dim=1) #[batch size, num_patches, ...] -> [batch size * num_patches, ...] / NOTE: optimize?
-                    labels = torch.flatten(torch.stack(labels, dim=0), start_dim=0, end_dim=1)
+                    inputs = torch.flatten(inputs, start_dim=0, end_dim=1) #[batch size, num_patches, ...] -> [batch size * num_patches, ...] / NOTE: optimize?
+                    labels = torch.flatten(labels, start_dim=0, end_dim=1)
                 else:
                     inputs, labels = batch #[batch size, ...]
                 inputs = inputs.to(device)
