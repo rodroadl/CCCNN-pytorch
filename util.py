@@ -62,14 +62,14 @@ class RandomPatches:
         else:
             h, w, _ = img.shape
         # left_upper, right_upper, right_lower, left_lower = self.mask_coord #(182,473)
+        center = list()
+        diameter = self.patch_size
+        radius = self.patch_size // 2
         coords = set()
         for row in range(h):
             for col in range(w):
                 if (row < h-radius-250 or col < w-radius-175): coords.add((row, col)) 
-
-        center = list()
-        diameter = self.patch_size
-        radius = self.patch_size // 2
+                
         for _ in range(self.num_patches):
             valid = False
             while not valid:
