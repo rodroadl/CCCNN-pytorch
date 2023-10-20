@@ -56,6 +56,7 @@ class RandomPatches:
         self.mask_coord = mask_coord
 
     def __call__(self, img):
+        print("Sampling Random Patches")
         if torch.is_tensor(img):
             _, h, w = img.size()
         else:
@@ -68,11 +69,11 @@ class RandomPatches:
         for _ in range(self.num_patches):
             valid = False
             while not valid:
-                y0, x0 = randint(radius,h-radius), randint(radius,w-radius)
+                y0, x0 = torch.randint(radius,h-radius+1, (1,)).item(), torch.randint(radius,w-radius+1, (1,)).item()
                 valid = (y0 < h - radius or x0 < w - radius) and (y0,x0) not in center and not (y0,x0) in exception
                 for y, x in center:
                     if not valid: break
-                    valid &= abs(y-y0) > diameter and abs(x-x0) > diameter
+                    valid &= torch.abs(y-y0) > diameter and torch.abs(x-x0) > diameter
                 # termination: valid=False or (valid=True and i = len(taken))
             if valid: 
                 center.add((y0,x0))
@@ -86,5 +87,5 @@ class RandomPatches:
             else:
                 patch = img[x-16:x+16, y-16:y+16 , :]
             patches.append(patch)
-            
+        print("Done")
         return patches
