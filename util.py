@@ -56,10 +56,7 @@ class RandomPatches:
         self.mask_coord = mask_coord
 
     def __call__(self, img):
-        if torch.is_tensor(img):
-            _, h, w = img.size()
-        else:
-            h, w, _ = img.shape
+        _, h, w = img.size()
         # left_upper, right_upper, right_lower, left_lower = self.mask_coord #(182,473)
         
         diameter = self.patch_size
@@ -85,10 +82,7 @@ class RandomPatches:
 
         patches = []
         for x,y in center:
-            if torch.is_tensor(img):
-                patch = img[:, x-16:x+16, y-16:y+16]
-            else:
-                patch = img[x-16:x+16, y-16:y+16 , :]
+            patch = img[:, y-16:y+16, x-16:x+16]
             patches.append(patch)
         
         return patches
