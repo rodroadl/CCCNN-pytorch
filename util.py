@@ -77,6 +77,7 @@ class RandomPatches:
             while coords and not valid:
                 y0, x0 = sample(coords, 1)[0]
                 coords.remove((y0, x0))
+                valid = True
                 for y, x in center:
                     if not valid: break
                     valid &= abs(y-y0) > diameter and abs(x-x0) > diameter
