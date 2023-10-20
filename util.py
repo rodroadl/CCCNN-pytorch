@@ -84,6 +84,6 @@ class RandomPatches:
             patch = img[:, y-16:y+16, x-16:x+16].type(torch.float32)
             patches.append(patch)
         
-        t = torch.Tensor(len(patches), 32, 32)
+        t = torch.Tensor(len(patches), 3, 32, 32)
         torch.cat(patches, out=t)
         return t
