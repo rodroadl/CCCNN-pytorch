@@ -71,6 +71,7 @@ class EvalDataset(Dataset):
             image[image != 0] = torch.log(max_val * image[image != 0])
             label = torch.log(label+eps)
             # image, label = torch.log(image+1e-7), torch.log(label+1e-7)
+        image = image.type(torch.float32) # necessary?
         return image, label
     
     def __len__(self):
