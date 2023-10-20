@@ -27,17 +27,6 @@ You can just run train and test on Colab using *colab.ipynb* or on your terminal
 The [SimpleCube++](https://github.com/Visillect/CubePlusPlus) dataset
 
 ```bash
-python src/train.py --train-file "data/91-image_x3.h5" \
-                --eval-file "data/Set5_x3.h5" \
-                --outputs-dir "pth" \
-                --scale 3 \
-                --lr 1e-4 \
-                --batch-size 16 \
-                --num-epochs 400 \
-                --seed 123                
-```
-
-```bash
 python train.py --train-images-dir ./SimpleCube++/train/PNG \
                 --train-labels-file .SimpleCube++/train/gt.csv \
                 --eval-images-dir ./SimpleCube++/test/PNG \
