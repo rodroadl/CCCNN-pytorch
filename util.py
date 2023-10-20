@@ -63,8 +63,8 @@ class RandomPatches:
             h, w, _ = img.shape
         # left_upper, right_upper, right_lower, left_lower = self.mask_coord #(182,473)
         coords = set()
-        for row in h:
-            for col in w:
+        for row in range(h):
+            for col in range(w):
                 if (row < h-radius-250 or col < w-radius-175): coords.add((row, col)) 
 
         center = list()
