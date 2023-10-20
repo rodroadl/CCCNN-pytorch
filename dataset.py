@@ -27,7 +27,7 @@ class CustomDataset(Dataset):
         self.transform = transforms.Compose([
                 # MaxResize(1200),
                 ContrastNormalization(),
-                RandomPatches(patch_size = 32, num_pathces = self.num_patches)
+                RandomPatches(patch_size = 32, num_patches = self.num_patches)
                 ])
 
     def __getitem__(self, idx):
