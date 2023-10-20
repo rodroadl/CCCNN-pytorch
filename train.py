@@ -101,9 +101,10 @@ def main():
         with tqdm(total=(len(train_dataset)- len(train_dataset)% args.batch_size)) as train_pbar:
             train_pbar.set_description('train epoch: {}/{}'.format(epoch, args.num_epochs - 1))
 
-            for batch in train_dataloader:
+            for inputs, labels in train_dataloader:
                 if args.num_patches > 1:
-                    inputs, labels = torch.flatten(torch.stack(batch, dim=0), start_dim=0, end_dim=1) #[batch size, num_patches, ...] -> [batch size * num_patches, ...]
+                    inputs = torch.flatten(torch.stack(inputs, dim=0), start_dim=0, end_dim=1) #[batch size, num_patches, ...] -> [batch size * num_patches, ...] / NOTE: optimize?
+                    labels = torch.flatten(torch.stack(labels, dim=0), start_dim=0, end_dim=1)
                 else:
                     inputs, labels = batch #[batch size, ...]
                 inputs = inputs.to(device)
