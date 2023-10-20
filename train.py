@@ -103,7 +103,7 @@ def main():
 
             for batch in train_dataloader:
                 if args.num_patches > 1:
-                    inputs, labels = torch.flatten(batch,start_dim=0, end_dim=1) #[batch size, num_patches, ...] -> [batch size * num_patches, ...]
+                    inputs, labels = torch.cat(batch) #[batch size, num_patches, ...] -> [batch size * num_patches, ...]
                 else:
                     inputs, labels = batch #[batch size, ...]
                 inputs = inputs.to(device)
