@@ -43,7 +43,7 @@ class CustomDataset(Dataset):
             # image, label = torch.log(image+1e-7), torch.log(label+1e-7)
         
         if self.num_patches > 1: 
-            num_image,_,_,_ = image.size()
+            num_image,_,_,_ = len(image)
             for i in range(num_image):
                 image[i] = image[i].type(torch.float32)
             return image, [label] * num_image
