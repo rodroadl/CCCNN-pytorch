@@ -80,7 +80,7 @@ class RandomPatches:
             if valid: center.append((y0,x0))
 
         patches = []
-        for x,y in center:
+        for y,x in center:
             patch = img[:, y-16:y+16, x-16:x+16]
             patches.append(patch)
         
