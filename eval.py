@@ -67,6 +67,8 @@ def main():
         labels = torch.flatten(labels, start_dim=0, end_dim=1)
         inputs = inputs.to(device)
         labels = labels.to(device)
+        input = input.to(device)
+        label = label.to(device)
 
         with torch.no_grad(): preds = model(inputs)
 
@@ -76,8 +78,8 @@ def main():
 
         label_img = illuminate(input, label)
         pred_img = illuminate(input, mean_pred)
-        cv2.imwrite(os.path.join(args.outputs_dir,'label_{}'.format(idx)), label_img)
-        cv2.imwrite(os.path.join(args.outputs_dir,'pred_{}'.format(idx)), pred_img)
+        cv2.imwrite(os.path.join(args.outputs_dir,'label_{}.jpg'.format(idx)), label_img)
+        cv2.imwrite(os.path.join(args.outputs_dir,'pred_{}.jpg'.format(idx)), pred_img)
 
     # calculate stats
     losses.sort()

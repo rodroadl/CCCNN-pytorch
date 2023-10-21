@@ -63,6 +63,8 @@ def angularLoss(xs, ys):
         output(float) - accumulated angular loss in degrees
     '''
     output = 0
+    if xs.shape[0] == 1: return math.degrees(torch.arccos(torch.nn.functional.cosine_similarity(x,y)).item())
+
     for x, y in zip(xs, ys):
         output += math.degrees(torch.arccos(torch.nn.functional.cosine_similarity(x,y, dim=0)).item())
     return output
@@ -79,7 +81,7 @@ def illuminate(img, illum):
         output(numpy.ndarray) - 
     '''
     linearize = ContrastNormalization()
-    linearized_img = linearize(img).permute(1,2,0).numpy() # h,w,c -> c,h,w
+    linearized_img = linearize(img).permute(1,2,0).cpu().numpy() # h,w,c -> c,h,w
     illum = illum.cpu().numpy()
     white_balanced_image = linearized_img/illum
     rgb_img = np.dot(white_balanced_image, cam2rgb.T)
