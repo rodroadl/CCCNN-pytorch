@@ -56,15 +56,14 @@ def angularLoss(xs, ys):
     Return accumulated angular loss in degrees
 
     Parameter:
-        xs(sequence of tensors) - sequence of tensors to calculate angular loss
-        ys(sequence of tensors) - sequence of tensors to calculate angular loss
+        xs(tensor or sequence of tensors) - sequence of tensors to calculate angular loss
+        ys(tensor or sequence of tensors) - sequence of tensors to calculate angular loss
 
     Return:
         output(float) - accumulated angular loss in degrees
     '''
+    if xs.shape[0] == 1: return math.degrees(torch.arccos(torch.nn.functional.cosine_similarity(xs,ys, dim=-1)).item())
     output = 0
-    if xs.shape[0] == 1: return math.degrees(torch.arccos(torch.nn.functional.cosine_similarity(x,y)).item())
-
     for x, y in zip(xs, ys):
         output += math.degrees(torch.arccos(torch.nn.functional.cosine_similarity(x,y, dim=0)).item())
     return output

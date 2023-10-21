@@ -73,13 +73,16 @@ def main():
         with torch.no_grad(): preds = model(inputs)
 
         mean_pred = torch.mean(preds, dim=0)
-        loss = angularLoss(mean_pred, label) / preds.shape[0]
+        loss = angularLoss(mean_pred, label)
         losses.append(loss)
 
+        # reconstruct PNG to JPG with gt/pred illumination
         label_img = illuminate(input, label)
         pred_img = illuminate(input, mean_pred)
-        cv2.imwrite(os.path.join(args.outputs_dir,'label_{}.jpg'.format(idx)), label_img)
-        cv2.imwrite(os.path.join(args.outputs_dir,'pred_{}.jpg'.format(idx)), pred_img)
+
+        # save the reconstructed image
+        cv2.imwrite(os.path.join(args.outputs_dir,'label_{:03d}.jpg'.format(idx)), cv2.cvtColor(label_img, cv2.COLOR_RGB2BGR))
+        cv2.imwrite(os.path.join(args.outputs_dir,'pred_{:03d}.jpg'.format(idx)), cv2.cvtColor(pred_img, cv2.COLOR_RGB2BGR))
 
     # calculate stats
     losses.sort()
@@ -95,7 +98,7 @@ def main():
 
     # draw histogram
     plt.hist(losses)
-
+    plt.show()
 
 if __name__ == '__main__':
     main()

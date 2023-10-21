@@ -8,7 +8,7 @@ PyTorch implementation of Color Constancy Convolutional Network in [Color Consta
 > S. Bianco, C. Cusano and R. Schettini, "Color constancy using CNNs," 2015 IEEE Conference on Computer Vision and Pattern Recognition Workshops (CVPRW), Boston, MA, USA, 2015, pp. 81-89, doi: 10.1109/CVPRW.2015.7301275.
 
 ### TODO
-- [ ] At testing time, generate a single illuminant estimation per image by pooling the predicted patch illuminants
+- [x] At testing time, generate a single illuminant estimation per image by pooling the predicted patch illuminants
 - [ ] Optimize ```RandomPatches```
 
 ## How to
