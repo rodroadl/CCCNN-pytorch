@@ -72,3 +72,41 @@ class CustomDataset(Dataset):
             length(int)
         '''
         return len(self.images)
+
+class ReferenceDataset(Dataset):
+    def __init__(self, data_dir, label_file,):
+        '''
+        Constructor
+
+        Parameters:
+            data_dir(str or Path) - path for directory containing images
+            lable_file(str or Path) - path for label file
+        '''
+        self.images_dir = Path(data_dir)
+        self.labels = pd.read_csv(label_file)
+        self.images = os.listdir(self.images_dir)
+
+    def __getitem__(self, idx):
+        '''
+        Return an image and label for given index
+
+        Parameters:
+            idx(int) - index
+
+        Return:
+            image(tensor)
+            label(tensos)
+        '''
+        image = read_16bit_png(os.path.join(self.images_dir,self.images[idx]))
+        label = torch.tensor(self.labels.iloc[idx, 1:4].astype(float).values, dtype=torch.float32) 
+        
+        return image, label
+    
+    def __len__(self):
+        '''
+        Return the length of the dataset
+
+        Return:
+            length(int)
+        '''
+        return len(self.images)
