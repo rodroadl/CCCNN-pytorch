@@ -2,7 +2,7 @@
 train.py
 
 Last edited by: GunGyeom James Kim
-Last edited at: Oct 16th, 2023
+Last edited at: Oct 20th, 2023
 CS 7180: Advnaced Perception
 
 code for training the network
@@ -34,7 +34,7 @@ def main():
     # setting up argumentparser
     parser = argparse.ArgumentParser()
     parser.add_argument('--log-space', default=False, action='store_true')
-    parser.add_argument('--num-patches', type=int, default=1)
+    parser.add_argument('--num-patches', type=int, required=True)
     parser.add_argument('--train-images-dir', type=str, required=True)
     parser.add_argument('--train-labels-file', type=str, required=True)
     parser.add_argument('--eval-images-dir', type=str, required=True)
@@ -103,9 +103,8 @@ def main():
 
             for batch in train_dataloader:
                 inputs, labels = batch
-                if args.num_patches > 1:
-                    inputs = torch.flatten(inputs, start_dim=0, end_dim=1) #[batch size, num_patches, ...] -> [batch size * num_patches, ...] / NOTE: optimize?
-                    labels = torch.flatten(labels, start_dim=0, end_dim=1)
+                inputs = torch.flatten(inputs, start_dim=0, end_dim=1) #[batch size, num_patches, ...] -> [batch size * num_patches, ...] / NOTE: optimize?
+                labels = torch.flatten(labels, start_dim=0, end_dim=1)
                 inputs = inputs.to(device)
                 labels = labels.to(device)
                 preds = model(inputs)
@@ -124,9 +123,8 @@ def main():
             num_patches = 0
             for batch in eval_dataloader:
                 inputs, labels = batch
-                if args.num_patches > 1:
-                    inputs = torch.flatten(inputs, start_dim=0, end_dim=1) #[batch size, num_patches, ...] -> [batch size * num_patches, ...] / NOTE: optimize?
-                    labels = torch.flatten(labels, start_dim=0, end_dim=1)
+                inputs = torch.flatten(inputs, start_dim=0, end_dim=1) #[batch size, num_patches, ...] -> [batch size * num_patches, ...] / NOTE: optimize?
+                labels = torch.flatten(labels, start_dim=0, end_dim=1)
                 num_patches += inputs.shape[0]
                 inputs = inputs.to(device)
                 labels = labels.to(device)

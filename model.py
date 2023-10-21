@@ -2,7 +2,7 @@
 model.py
 
 Last edited by: GunGyeom James Kim
-Last edited at: Oct 12th, 2023
+Last edited at: Oct 20th, 2023
 CS 7180: Advnaced Perception
 
 architecture of CNN proposed in Color Constancy Using CNNs
@@ -14,7 +14,6 @@ class CCCNN(nn.Module):
     def __init__(self):
         '''
         constructor
-        
         '''
         super(CCCNN, self).__init__()
         self.conv = nn.Conv2d(3, 240, 1)

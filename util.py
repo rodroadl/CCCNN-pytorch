@@ -1,73 +1,207 @@
+'''
+util.py
+
+Last edited by: GunGyeom James Kim
+Last edited at: Oct 20th, 2023
+CS 7180: Advnaced Perception
+
+File containing utility functions
+
+variable:
+    cam2rgb - Global variable, transformation matrix for cam to RGB
+
+function:
+    read_16bit_png - read 16bit png file using torch
+    angularLoss - calculate accumulated angular loss in degrees
+    illuminate - Linearize, illuminate, map to RGB and gamma correct
+    L2sRGB - Map linear chromaticity space to sRGB chromaticity space
+
+class:
+    MaxResize - scale input resizing longer size to max
+    ContrastNormalization - apply histogram stretching to normalize contrast
+    RandomPatches - randomly crop image to number of 32x32 patches
+'''
+# built-in
 import math 
 from random import sample
 
+# third-party
+import numpy as np
+
+# torch
 import torch
 from torchvision.io import read_file
 from torchvision.transforms import functional as F
 
+cam2rgb = np.array([
+    1.8795, -1.0326, 0.1531,
+    -0.2198, 1.7153, -0.4955,
+    0.0069, -0.5150, 1.5081,]).reshape((3, 3))
+
 def read_16bit_png(file):
+    '''
+    Return 16 bit image
+
+    Parameter:
+        file(str or Path) - 16bit image file
+
+    Return:
+        16bit image
+    '''
     data = read_file(file)
     return torch.ops.image.decode_png(data, 0, True)
 
 def angularLoss(xs, ys):
+    '''
+    Return accumulated angular loss in degrees
+
+    Parameter:
+        xs(sequence of tensors) - sequence of tensors to calculate angular loss
+        ys(sequence of tensors) - sequence of tensors to calculate angular loss
+
+    Return:
+        output(float) - accumulated angular loss in degrees
+    '''
     output = 0
     for x, y in zip(xs, ys):
         output += math.degrees(torch.arccos(torch.nn.functional.cosine_similarity(x,y, dim=0)).item())
     return output
 
-def linearize(img, black_lvl=2048, saturation_lvl=2**14-1):
-    return torch.clip((img - black_lvl)/(saturation_lvl - black_lvl), 0, 1)
+def illuminate(img, illum):
+    '''
+    Linearize, illuminate, map to RGB and gamma correct
 
-def linearize_expand(img, black_lvl=0, saturation_lvl=2**16-1):
-    return linearize(img, black_lvl, saturation_lvl) * (saturation_lvl - black_lvl)
+    Parameter:
+        img(tensor) - image to process
+        idx(int) - index to get illumination
 
-def linearize_expand_log(img, black_lvl=0, saturation_lvl=2**16-1):
-    x = torch.log(linearize_expand(img, black_lvl, saturation_lvl))
-    x = torch.nn.functional.normalize(x)
-    return torch.nan_to_num(x)
+    Return:
+        output(numpy.ndarray) - 
+    '''
+    linearize = ContrastNormalization()
+    linearized_img = linearize(img).permute(1,2,0).numpy() # h,w,c -> c,h,w
+    illum = illum.numpy()
+    white_balanced_image = linearized_img/illum
+    rgb_img = np.dot(white_balanced_image, cam2rgb.T)
+    rgb_img = np.clip(rgb_img, 0, 1)**(1/2.2)
+    return (rgb_img*255).astype(np.uint8)
 
-### Transform 
+def L2sRGB(linImg):
+    '''
+    Map linear chromaticity space to sRGB chromaticity space
 
+    Parameter:
+        linImg(tensor) - image in linear chromaticity space
+
+    Return:
+        linImg(tensor) - image map to sRGB chromaticity space
+    '''
+    low_mask = linImg <= 0.0031308
+    high_mask = linImg > 0.0031308
+    linImg[low_mask] *= 12.92
+    linImg[high_mask] = 1.055 * linImg[high_mask]**(1/2.4) - 0.055
+    return linImg
+
+#################
+### Transform ### 
+#################
 class MaxResize:
+    '''
+    Downscale input while longer side is capped at self.max_length
+    '''
     def __init__(self, max_length):
+        '''
+        Constructor
+
+        Parameters:
+            max_length(int) - maximum length to downscale
+        '''
         self.max_length = max_length
         
     def __call__(self, img):
-        _, w, h = img.size()
-        ratio = float(w) / float(h)
-        if ratio > 1: # w > h
-            h0 = math.ceil(self.max_length / ratio)
-            return F.resize(img, (self.max_length, h0), antialias=True)
-        else: # h <= w
-            w0 = math.ceil(self.max_length / ratio)
-            return F.resize(img, (w0, self.max_length), antialias=True)
+        '''
+        Return downscaled image while longer side is capped at self.max_length
 
-class ContrastNormalization: # Contrast normalization - Global Histogram stretching
+        Parameter:
+            img(tensor) - image to downscale
+        Return:
+            downscaled image wheer longer side is capped at self.max_length
+        '''
+        _, h, w = img.size()
+        ratio = float(h) / float(w)
+        if ratio > 1: # h > w
+            w0 = math.ceil(self.max_length / ratio)
+            return F.resize(img, (self.max_length, w0), antialias=True)
+        else: # h <= w
+            h0 = math.ceil(self.max_length / ratio)
+            return F.resize(img, (h0, self.max_length), antialias=True)
+
+class ContrastNormalization:
+    '''
+    Apply Global Histogram Stretching to normalize contrast
+    '''
     def __init__(self, black_lvl=2048):
+        '''
+        Constructor
+
+        Parameter:
+            black_lvl(int, optional) - value of black orginall captured by camera
+        '''
         self.black_lvl = black_lvl
     def __call__(self, img):
+        '''
+        Return contrast normalized image
+
+        Parameters:
+            img(tensor) - image to contrast normalize
+
+        Return:
+            output(tensor) - contrast normalized image in [0,1]
+        '''
         saturation_lvl = torch.max(img)
         return (img - self.black_lvl)/(saturation_lvl - self.black_lvl)
 
 class RandomPatches:
-    def __init__(self, patch_size, num_patches=1):
+    '''
+    Randomly crop image to number of 32x32 patches
+    '''
+    def __init__(self, patch_size, num_patches):
+        '''
+        Constructor
+
+        Parameters:
+            patch_size(int) - size of patch
+            num_patches(int) - number of patch to return
+        '''
         self.patch_size = patch_size
         self.num_patches = num_patches
 
     def __call__(self, img):
-        if self.num_patches == 1: return img
+        '''
+        Return sequences of 32x32 patches that was randomly cropped from image
+
+        Parameter:
+            img(tensor) - image to radomly crop 32x32 patches
+        Return:
+            sequences of 32x32 patches that was randomly cropped from image
+        '''
+        # specific to SimpleCube++
         MASK_HEIGHT = 250
         MASK_WIDTH = 175
+
+        # assign and initiate variables
         _, h, w = img.size()        
         diameter = self.patch_size
         radius = self.patch_size // 2
         coords = set()
         center = list()
 
+        # populate candidate for center of patches
         for row in range(radius, h-radius):
             for col in range(radius, w-radius):
-                if (row < h-radius-MASK_HEIGHT or col < w-radius-MASK_WIDTH): coords.add((row, col)) 
+                if (row < h-radius-MASK_HEIGHT or col < w-radius-MASK_WIDTH): coords.add((row, col)) # check whether it overlap with masked rectangle
 
+        # sample center for patches
         for _ in range(self.num_patches):
             valid = False
             while coords and not valid:
@@ -75,14 +209,14 @@ class RandomPatches:
                 coords.remove((y0, x0))
                 valid = True
                 for y, x in center:
-                    if not valid: break
-                    valid &= abs(y-y0) > diameter and abs(x-x0) > diameter
-                # termination: valid=False or (valid=True and i = len(taken))
-            if valid: center.append((y0,x0))
+                    if not valid: break # if overlap, try another one
+                    valid &= abs(y-y0) > diameter and abs(x-x0) > diameter # check whether it overlap with other patches
+            if valid: center.append((y0,x0)) # if it doesn't overlap, sample it
 
+        # sample patches according to chosen centers
         patches = []
         for y,x in center:
             patch = img[:, y-16:y+16, x-16:x+16].type(torch.float32)
             patches.append(patch)
 
-        return torch.stack(patches, dim=0)
+        return torch.stack(patches, dim=0) # list of tensors -> sequence(tensor) of tensors

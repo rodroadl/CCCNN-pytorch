@@ -7,10 +7,12 @@ CS 7180: Advnaced Perception
 
 Evaluate the CCCNN
 '''
-
+import os
 import argparse
 import numpy as np
 import PIL.Image as pil_image
+import cv2
+import matplotlib.pyplot as plt
 
 # torch
 import torch
@@ -20,7 +22,7 @@ from torch.utils.data import DataLoader
 # custom
 from model import CCCNN
 from dataset import CustomDataset
-from util import angularLoss
+from util import angularLoss, illuminate
 
 def main():
     '''
@@ -28,6 +30,7 @@ def main():
     '''
     # initialize the argument parser
     parser = argparse.ArgumentParser()
+    parser.add_argument('--num-patches', type=int, required=True)
     parser.add_argument('--weights-file', type=str, required=True)
     parser.add_argument('--images-dir', type=str, required=True)
     parser.add_argument('--labels-file', type=str, required=True)
@@ -53,13 +56,39 @@ def main():
                                 num_workers=args.num_workers
                                 )
     
-    for batch in eval_dataloader:
+    losses = []
+    for idx, batch, input, label in enumerate(zip(eval_dataloader, eval_dataset)):
         inputs, labels = batch
+        inputs = torch.flatten(inputs, start_dim=0, end_dim=1) #[batch size, num_patches, ...] -> [batch size * num_patches, ...] / NOTE: optimize?
+        labels = torch.flatten(labels, start_dim=0, end_dim=1)
         inputs = inputs.to(device)
         labels = labels.to(device)
+
         with torch.no_grad(): preds = model(inputs)
-        batch_loss = angularLoss(preds, labels)
-    # save the output of SRCNN
+
+        mean_pred = torch.mean(preds)
+        loss = angularLoss(mean_pred, label) / preds.shape[0]
+        losses.append(loss)
+
+        label_img = illuminate(input, label)
+        pred_img = illuminate(input, mean_pred)
+        cv2.imwrite(os.path.join(args.outputs_dir,'label_{}'.format(idx)), label_img)
+        cv2.imwrite(os.path.join(args.outputs_dir,'pred_{}'.format(idx)), pred_img)
+
+    # calculate stats
+    losses.sort()
+    l = len(losses)
+    minimum = min(losses)
+    tenth = losses[l//10]
+    median = losses[l//2]
+    average = sum(losses) / l
+    ninetieth = losses[l * 9 // 10]
+    maximum = max(losses)
+
+    print("Min: {}\n10th per: {}\nMed: {}\nAvg: {}\n 90th per: {}\nMax: {}\n".format(minimum, tenth, median, average, ninetieth, maximum))
+
+    # draw histogram
+    plt.hist(losses)
 
 
 if __name__ == '__main__':
