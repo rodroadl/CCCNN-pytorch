@@ -80,7 +80,7 @@ def illuminate(img, illum):
     '''
     linearize = ContrastNormalization()
     linearized_img = linearize(img).permute(1,2,0).numpy() # h,w,c -> c,h,w
-    illum = illum.numpy()
+    illum = illum.cpu().numpy()
     white_balanced_image = linearized_img/illum
     rgb_img = np.dot(white_balanced_image, cam2rgb.T)
     rgb_img = np.clip(rgb_img, 0, 1)**(1/2.2)

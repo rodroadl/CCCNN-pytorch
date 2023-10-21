@@ -52,7 +52,7 @@ def main():
     model.eval()
 
     # configure datasets and dataloaders
-    ref_dataset = CustomDataset(args.images_dir, args.labels_file)
+    ref_dataset = ReferenceDataset(args.images_dir, args.labels_file)
     eval_dataset = CustomDataset(args.images_dir, args.labels_file, log_space=args.log_space, num_patches=args.num_patches)
     eval_dataloader = DataLoader(dataset=eval_dataset, 
                                 batch_size=1,
@@ -60,7 +60,7 @@ def main():
                                 )
     
     losses = []
-    for idx, (batch, data) in enumerate(zip(eval_dataloader, eval_dataset)):
+    for idx, (batch, data) in enumerate(zip(eval_dataloader, ref_dataset)):
         input, label = data
         inputs, labels = batch
         inputs = torch.flatten(inputs, start_dim=0, end_dim=1) #[batch size, num_patches, ...] -> [batch size * num_patches, ...] / NOTE: optimize?

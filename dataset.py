@@ -74,7 +74,7 @@ class CustomDataset(Dataset):
         return len(self.images)
 
 class ReferenceDataset(Dataset):
-    def __init__(self, data_dir, label_file,):
+    def __init__(self, data_dir, label_file):
         '''
         Constructor
 
