@@ -144,7 +144,7 @@ def main():
                 best_loss = round_loss
                 best_weights = copy.deepcopy(model.state_dict())
     print('best epoch: {}, angular loss: {:.2f}'.format(best_epoch, best_loss))
-    torch.save(best_weights, os.path.join(args.outputs_dir, 'best.pth'))
+    torch.save(best_weights, os.path.join(args.outputs_dir, '{}2{}_lr{}_{}.pth'.format(args.image_space, args.label_space,args.lr, best_loss)))
 
     plt.figure()
     plt.subplot(211)
