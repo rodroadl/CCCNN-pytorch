@@ -16,10 +16,10 @@ import pandas as pd
 from pathlib import Path
 from torch.utils.data import Dataset
 from torchvision import transforms
-from util import read_16bit_png, MaxResize, ContrastNormalization, RandomPatches
+from util import read_16bit_png, ContrastNormalization, RandomPatches, MaxResize
 
 class CustomDataset(Dataset):
-    def __init__(self, data_dir, label_file, num_patches, log_space=False):
+    def __init__(self, data_dir, label_file, num_patches, image_space='linear', label_space='linear'):
         '''
         constructor
 
@@ -32,14 +32,14 @@ class CustomDataset(Dataset):
         self.images_dir = Path(data_dir)
         self.labels = pd.read_csv(label_file)
         self.images = os.listdir(self.images_dir)
-        self.log_space = log_space
         self.num_patches = num_patches
+        self.image_space = image_space
+        self.label_space = label_space
         self.transform = transforms.Compose([
                 # MaxResize(1200), # SimpleCube++ has width of 648 and height of 432
                 ContrastNormalization(),
                 RandomPatches(patch_size = 32, num_patches = self.num_patches)
                 ])
-
     def __getitem__(self, idx):
         '''
         Return an images and labels for given index
@@ -53,14 +53,25 @@ class CustomDataset(Dataset):
         '''
         image = read_16bit_png(os.path.join(self.images_dir,self.images[idx]))
         label = torch.tensor(self.labels.iloc[idx, 1:4].astype(float).values, dtype=torch.float32) 
-        
+
+        # find saturation level for expanded log space
+        if self.image_space == 'expandedLog' or self.label_space == 'expandedLog': saturation_lvl = torch.max(image)
+
+        # transform
         if self.transform: image = self.transform(image)
-        if self.log_space:
-            max_val = 65535
+        if self.image_space == 'log': # ->[-infty, 0]
             eps = 1e-7
-            image[image != 0] = torch.log(max_val * image[image != 0])
+            image = torch.log(image+eps)
+        elif self.image_space == 'expandedLog': # ->[0, ~9.7]
+            image *= saturation_lvl
+            image[image != 0] = torch.log(image[image != 0])
+        if self.label_space == 'log': # ->[-infty, 0]
+            eps = 1e-7
             label = torch.log(label+eps)
-            # image, label = torch.log(image+1e-7), torch.log(label+1e-7)
+        elif self.label_space == 'expandedLog': # ->[0, ~9.7]
+            label *= saturation_lvl
+            label[label != 0] = torch.log(label[label != 0])
+            label = torch.clip(label, 0, saturation_lvl)
 
         return image, torch.stack([label] * image.shape[0], dim=0)
     

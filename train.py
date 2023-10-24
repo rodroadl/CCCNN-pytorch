@@ -20,6 +20,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.backends.cudnn as cudnn
+from torchvision import transforms
 from torch.utils.data import DataLoader
 
 # custom
@@ -33,7 +34,8 @@ def main():
     '''
     # setting up argumentparser
     parser = argparse.ArgumentParser()
-    parser.add_argument('--log-space', default=False, action='store_true')
+    parser.add_argument('--image-space', type=str, default='linear')
+    parser.add_argument('--label-space', type=str, default='linear')
     parser.add_argument('--num-patches', type=int, required=True)
     parser.add_argument('--train-images-dir', type=str, required=True)
     parser.add_argument('--train-labels-file', type=str, required=True)
@@ -73,8 +75,8 @@ def main():
     ''')
 
     # configure datasets and dataloaders
-    train_dataset = CustomDataset(args.train_images_dir, args.train_labels_file, log_space=args.log_space, num_patches=args.num_patches)
-    eval_dataset = CustomDataset(args.eval_images_dir, args.eval_labels_file, log_space=args.log_space, num_patches=args.num_patches)
+    train_dataset = CustomDataset(args.train_images_dir, args.train_labels_file, args.num_patches, args.image_space, args.label_space)
+    eval_dataset = CustomDataset(args.eval_images_dir, args.eval_labels_file, args.num_patches, args.image_space, args.label_space)
     train_dataloader = DataLoader(dataset=train_dataset,
                                   batch_size=args.batch_size,
                                   shuffle=True,
