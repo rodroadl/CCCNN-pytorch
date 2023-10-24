@@ -130,7 +130,7 @@ def main():
                 inputs = inputs.to(device)
                 labels = labels.to(device)
                 with torch.no_grad(): preds = model(inputs)
-                batch_loss = angularLoss(preds, labels) if not args.log_space else angularLoss(torch.exp(preds), torch.exp(labels))
+                batch_loss = angularLoss(preds, labels)
                 round_loss += batch_loss
                 eval_pbar.update(args.batch_size)
             round_loss /= num_patches
