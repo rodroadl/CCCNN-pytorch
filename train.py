@@ -9,7 +9,6 @@ code for training the network
 '''
 
 import argparse
-import logging
 import os
 import copy
 from tqdm import tqdm
@@ -65,9 +64,9 @@ def main():
     ], lr=args.lr)
 
     # (Initialize logging)
-    logging.basicConfig(level=logging.INFO, format='%(levelname)s: %(message)s')
-    logging.info(f'''Starting training:
-        Space:          {"Log space" if args.log_space else "Linear space"}
+    print(f'''Starting training:
+        Image Space:    {args.image_space}
+        Label Space:    {args.label_space}
         Epoch:          {args.num_epochs}
         Batch size:     {args.batch_size}
         Learning rate:  {args.lr}
