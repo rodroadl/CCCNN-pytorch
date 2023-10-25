@@ -123,9 +123,7 @@ def to_rgb(inputs):
     num_patches = inputs.shape[0]
     if num_patches == 1: return inputs[0] / torch.sum(inputs[0])
     for idx in range(num_patches):
-        print("before norm:", inputs[idx])
         inputs[idx] = inputs[idx] / torch.sum(inputs[idx])
-        print("after norm:", inputs[idx])
     return inputs
 
 #################
