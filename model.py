@@ -16,9 +16,9 @@ class CCCNN(nn.Module):
         constructor
         '''
         super(CCCNN, self).__init__()
-        self.conv = nn.Conv2d(3, 240, 1)
-        self.fc1 = nn.Linear(3840, 40)
-        self.fc2 = nn.Linear(40, 3)
+        self.conv = nn.Conv2d(3, 240, 1) # first layer: 32x32x240
+        self.fc1 = nn.Linear(3840, 40) # fully connected layer of 40 nodes 
+        self.fc2 = nn.Linear(40, 3) # last layer: simple linear regression
 
     
     def forward(self, x):
@@ -30,12 +30,12 @@ class CCCNN(nn.Module):
         Return:
             x - estimated output
         '''
-        x = self.conv(x) # 32x32x240
+        x = self.conv(x) # first layer: 32x32x240
         x = F.max_pool2d(x, kernel_size=8, stride=8) # 4x4x240
         x = x.view(-1, 3840) #3840
-        x = self.fc1(x)
-        x = F.relu(x)
-        x = self.fc2(x)
+        x = self.fc1(x) # fully connected layer of 40 nodes
+        x = F.relu(x) #
+        x = self.fc2(x) # last layer: simple linear regression
         
         return x
 
