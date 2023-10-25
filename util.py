@@ -63,6 +63,7 @@ def angularLoss(xs, ys):
     Return:
         output(float) - accumulated angular loss in degrees
     '''
+    print(xs.shape)
     if xs.shape[0] == 1:
         print("angular loss - xs[0], ys[0]:", xs[0], ys[0])
         if torch.count_nonzero(xs[0]).item() == 0: return 180
