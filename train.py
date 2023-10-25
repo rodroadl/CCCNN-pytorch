@@ -104,12 +104,18 @@ def main():
 
             for batch in train_dataloader:
                 inputs, labels = batch
+                if torch.isnan(inputs).any():
+                    print("nan inputs from batch")
+                    raise SystemExit
                 inputs = torch.flatten(inputs, start_dim=0, end_dim=1) #[batch size, num_patches, ...] -> [batch size * num_patches, ...] / NOTE: optimize?
                 labels = torch.flatten(labels, start_dim=0, end_dim=1)
+                if torch.isnan(inputs).any():
+                    print("nan happened after flatten")
+                    raise SystemExit
                 inputs = inputs.to(device)
                 labels = labels.to(device)
                 if torch.isnan(inputs).any():
-                    print("nan inputs found")
+                    print("nan happened after .to(device)")
                     raise SystemExit
                 preds = model(inputs)
                 if torch.isnan(preds).any():

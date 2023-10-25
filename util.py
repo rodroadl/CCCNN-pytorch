@@ -164,7 +164,7 @@ class ContrastNormalization:
             output(tensor) - contrast normalized image in [0,1]
         '''
         saturation_lvl = torch.max(img)
-        return (img - self.black_lvl)/(saturation_lvl - self.black_lvl)
+        return torch.clamp((img - self.black_lvl)/(saturation_lvl - self.black_lvl),0,1)
 
 class RandomPatches:
     '''

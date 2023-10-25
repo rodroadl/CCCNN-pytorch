@@ -78,7 +78,7 @@ class CustomDataset(Dataset):
             label *= saturation_lvl
             # label[label != 0] = torch.log(label[label != 0])
             image = torch.where(label != 0, torch.log(label), 0.)
-            label = torch.clip(label, 0., saturation_lvl)
+            label = torch.clamp(label, 0., saturation_lvl)
 
         return image, torch.stack([label] * image.shape[0], dim=0)
     
