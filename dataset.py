@@ -53,19 +53,29 @@ class CustomDataset(Dataset):
         '''
         image = read_16bit_png(os.path.join(self.images_dir,self.images[idx]))
         label = torch.tensor(self.labels.iloc[idx, 1:4].astype(float).values, dtype=torch.float32) 
-
+        if torch.isnan(image).any():
+            print("nan image found")
+            raise SystemExit
         # find saturation level for expanded log space
         if self.image_space == 'expandedLog' or self.label_space == 'expandedLog': saturation_lvl = torch.max(image)
         else: eps = 1e-7
-
+        print("check dataset.py hit")
         # transform
         if self.transform: image = self.transform(image)
-
+        if torch.isnan(image).any():
+            print("nan happened after transformation")
+            raise SystemExit
         if self.image_space == 'log': # ->[-infty, 0]
             image = torch.log(image+eps)
         elif self.image_space == 'expandedLog': # ->[0, ~9.7]
             image *= saturation_lvl
+            if torch.isnan(image).any():
+                print("nan happened after expansion")
+                raise SystemExit
             image[image != 0] = torch.log(image[image != 0])
+            if torch.isnan(image).any():
+                print("nan happened after log")
+                raise SystemExit
 
         if self.label_space == 'log': # ->[-infty, 0]
             label = torch.log(label+eps)
