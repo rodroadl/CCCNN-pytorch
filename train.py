@@ -109,11 +109,11 @@ def main():
                 inputs = inputs.to(device)
                 labels = labels.to(device)
                 if torch.isnan(inputs).any():
-                    print("nan input found")
+                    print("nan inputs found")
                     raise SystemExit
                 preds = model(inputs)
                 if torch.isnan(preds).any():
-                    print("nan input found")
+                    print("nan preds found")
                     raise SystemExit
                 loss = criterion(preds,labels)
                 train_loss_log.append(loss.item())
