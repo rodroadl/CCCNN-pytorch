@@ -59,20 +59,15 @@ class CustomDataset(Dataset):
         # find saturation level for expanded log space
         if self.image_space == 'expandedLog' or self.label_space == 'expandedLog': saturation_lvl = torch.max(image)
         else: eps = 1e-7
-        print("check dataset.py hit")
         # transform
         if self.transform: image = self.transform(image)
-        if torch.isnan(image).any():
-            print("nan happened after transformation")
-            raise SystemExit
-        if self.image_space == 'log': # ->[-infty, 0]
+
+        if self.image_space == 'log': # [0,1]->[-infty, 0]
             image = torch.log(image+eps)
-        elif self.image_space == 'expandedLog': # ->[0, ~9.7]
+        elif self.image_space == 'expandedLog': # [0,1]->[0, ~9.7]
             image *= saturation_lvl
-            if torch.isnan(image).any():
-                print("nan happened after expansion")
-                raise SystemExit
-            image[image != 0] = torch.log(image[image != 0])
+            # image[image != 0] = torch.log(image[image != 0])
+            image = torch.where(image != 0, torch.log(image), 0)
             if torch.isnan(image).any():
                 print("nan happened after log")
                 raise SystemExit
@@ -81,7 +76,8 @@ class CustomDataset(Dataset):
             label = torch.log(label+eps)
         elif self.label_space == 'expandedLog': # ->[0, ~9.7]
             label *= saturation_lvl
-            label[label != 0] = torch.log(label[label != 0])
+            # label[label != 0] = torch.log(label[label != 0])
+            image = torch.where(label != 0, torch.log(label), 0)
             label = torch.clip(label, 0, saturation_lvl)
 
         return image, torch.stack([label] * image.shape[0], dim=0)
