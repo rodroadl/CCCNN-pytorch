@@ -2,7 +2,7 @@
 util.py
 
 Last edited by: GunGyeom James Kim
-Last edited at: Oct 20th, 2023
+Last edited at: Oct 24th, 2023
 CS 7180: Advnaced Perception
 
 File containing utility functions
