@@ -32,7 +32,7 @@ class CCCNN(nn.Module):
         '''
         x = self.conv(x) # first layer: 32x32x240
         x = F.max_pool2d(x, kernel_size=8, stride=8) # 4x4x240
-        x = x.view(-1, 3840) #3840
+        x = x.view(-1, 3840) # 3840
         x = self.fc1(x) # fully connected layer of 40 nodes
         x = F.relu(x) #
         x = self.fc2(x) # last layer: simple linear regression
