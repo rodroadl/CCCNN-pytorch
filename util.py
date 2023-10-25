@@ -119,9 +119,9 @@ def to_rgb(inputs):
         input(tensor) - input mapped to rgb chromaticity space
     '''
     num_inputs = inputs.shape[0]
-    if num_inputs == 1: return inputs / torch.sum(inputs)
+    if num_inputs == 1: return inputs[0] / torch.sum(inputs[0])
     for idx in range(num_inputs):
-        inputs[idx] = inputs / torch.sum(inputs[idx])
+        inputs[idx] = inputs[idx] / torch.sum(inputs[idx])
     return inputs
 
 #################
