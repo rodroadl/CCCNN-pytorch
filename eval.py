@@ -20,7 +20,7 @@ from torch.utils.data import DataLoader
 # custom
 from model import CCCNN
 from dataset import CustomDataset, ReferenceDataset
-from util import angularLoss, illuminate
+from util import angularLoss, illuminate, to_rgb
 
 def main():
     '''
@@ -28,7 +28,8 @@ def main():
     '''
     # initialize the argument parser
     parser = argparse.ArgumentParser()
-    parser.add_argument('--pred-space', type=str, default='linear')
+    parser.add_argument('--image-space', type=str, default='linear')
+    parser.add_argument('--label-space', type=str, default='linear')
     parser.add_argument('--num-patches', type=int, required=True)
     parser.add_argument('--weights-file', type=str, required=True)
     parser.add_argument('--images-dir', type=str, required=True)
@@ -53,7 +54,7 @@ def main():
 
     # configure datasets and dataloaders
     ref_dataset = ReferenceDataset(args.images_dir, args.labels_file)
-    eval_dataset = CustomDataset(args.images_dir, args.labels_file, num_patches=args.num_patches)
+    eval_dataset = CustomDataset(args.images_dir, args.labels_file, num_patches=args.num_patches, image_space=args.image_space, label_space=args.label_space)
     eval_dataloader = DataLoader(dataset=eval_dataset, 
                                 batch_size=1,
                                 num_workers=args.num_workers
@@ -71,6 +72,18 @@ def main():
         label = label.to(device)
 
         with torch.no_grad(): preds = model(inputs)
+
+        if args.label_sapce == "log": # [-infty, 0)
+            eps = 1e-7
+            preds = torch.exp(label-eps)
+            if torch.isnan(preds).any():
+                print("nan in preds")
+                raise SystemExit
+        elif args.label_space == "expandedLog":
+            preds = torch.where(preds != 0, torch.exp(preds), 0.)
+        
+        # map to rgb chromaticty space
+        preds = to_rgb(preds)
 
         mean_pred = torch.mean(preds, dim=0)
         loss = angularLoss(mean_pred, label)
