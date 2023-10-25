@@ -2,15 +2,13 @@
 eval.py
 
 Last edited by: GunGyeom James Kim
-Last edited at: Oct 16th, 2023
+Last edited at: Oct 25th, 2023
 CS 7180: Advnaced Perception
 
 Evaluate the CCCNN
 '''
 import os
 import argparse
-import numpy as np
-import PIL.Image as pil_image
 import cv2
 import matplotlib.pyplot as plt
 
@@ -30,7 +28,7 @@ def main():
     '''
     # initialize the argument parser
     parser = argparse.ArgumentParser()
-    parser.add_argument('--log-space', default=False, action='store_true')
+    parser.add_argument('--pred-space', type=str, default='linear')
     parser.add_argument('--num-patches', type=int, required=True)
     parser.add_argument('--weights-file', type=str, required=True)
     parser.add_argument('--images-dir', type=str, required=True)
@@ -38,6 +36,8 @@ def main():
     parser.add_argument('--outputs-dir', type=str, required=True)
     parser.add_argument('--num-workers', type=int, default=os.cpu_count())
     args = parser.parse_args()
+
+    if not os.path.exists(args.outputs_dir): os.makedirs(args.outputs_dir)
 
     # set up device and initialize the network
     cudnn.benchmark = True
@@ -53,15 +53,15 @@ def main():
 
     # configure datasets and dataloaders
     ref_dataset = ReferenceDataset(args.images_dir, args.labels_file)
-    eval_dataset = CustomDataset(args.images_dir, args.labels_file, log_space=args.log_space, num_patches=args.num_patches)
+    eval_dataset = CustomDataset(args.images_dir, args.labels_file, num_patches=args.num_patches)
     eval_dataloader = DataLoader(dataset=eval_dataset, 
                                 batch_size=1,
                                 num_workers=args.num_workers
                                 )
     
     losses = []
-    for idx, (batch, data) in enumerate(zip(eval_dataloader, ref_dataset)):
-        input, label = data
+    for  (batch, data) in zip(eval_dataloader, ref_dataset):
+        input, label, name = data
         inputs, labels = batch
         inputs = torch.flatten(inputs, start_dim=0, end_dim=1) #[batch size, num_patches, ...] -> [batch size * num_patches, ...] / NOTE: optimize?
         labels = torch.flatten(labels, start_dim=0, end_dim=1)
@@ -81,8 +81,8 @@ def main():
         pred_img = illuminate(input, mean_pred)
 
         # save the reconstructed image
-        cv2.imwrite(os.path.join(args.outputs_dir,'label_{:03d}.jpg'.format(idx)), cv2.cvtColor(label_img, cv2.COLOR_RGB2BGR))
-        cv2.imwrite(os.path.join(args.outputs_dir,'pred_{:03d}.jpg'.format(idx)), cv2.cvtColor(pred_img, cv2.COLOR_RGB2BGR))
+        cv2.imwrite(os.path.join(args.outputs_dir,'label_{}.jpg'.format(name)), cv2.cvtColor(label_img, cv2.COLOR_RGB2BGR))
+        cv2.imwrite(os.path.join(args.outputs_dir,'pred_{}.jpg'.format(name)), cv2.cvtColor(pred_img, cv2.COLOR_RGB2BGR))
 
     # calculate stats
     losses.sort()
