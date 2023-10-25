@@ -64,10 +64,8 @@ class CustomDataset(Dataset):
         if self.image_space == 'log': # ->[-infty, 0]
             image = torch.log(image+eps)
         elif self.image_space == 'expandedLog': # ->[0, ~9.7]
-            print("before expanding and log:" , image)
             image *= saturation_lvl
             image[image != 0] = torch.log(image[image != 0])
-            print("after expanding and log:" , image)
 
         if self.label_space == 'log': # ->[-infty, 0]
             label = torch.log(label+eps)
