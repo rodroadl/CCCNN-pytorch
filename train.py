@@ -46,7 +46,7 @@ def main():
     parser.add_argument('--num-workers', type=int, default=os.cpu_count())
     parser.add_argument('--seed', type=int, default=123)
     args = parser.parse_args()
-    
+
     if not os.path.exists(args.outputs_dir): os.makedirs(args.outputs_dir)
 
     # set up device, instantiate the SRCNN model, set up criterion and optimizer
@@ -163,7 +163,6 @@ def main():
     plt.figure()
     ax1 = plt.subplot(211)
     ax1.plot(range(len(train_loss_log)), train_loss_log)
-    ax1.set_ylim(0, 100)
     ax2 = plt.subplot(212)
     ax2.plot(range(len(eval_loss_log)), eval_loss_log)
     plt.show()
