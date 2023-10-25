@@ -159,13 +159,14 @@ def main():
                 best_loss = round_loss
                 best_weights = copy.deepcopy(model.state_dict())
     print('best epoch: {}, angular loss: {:.2f}'.format(best_epoch, best_loss))
-    torch.save(best_weights, os.path.join(args.outputs_dir, '{}2{}_lr{}_{}.pth'.format(args.image_space, args.label_space,args.lr, best_loss)))
+    torch.save(best_weights, os.path.join(args.outputs_dir, '{}2{}_lr{}_{:.2f}.pth'.format(args.image_space, args.label_space,args.lr, best_loss)))
 
     plt.figure()
-    plt.subplot(211)
-    plt.plot(range(len(train_loss_log)), train_loss_log)
-    plt.subplot(212)
-    plt.plot(range(len(eval_loss_log)), eval_loss_log)
+    ax1 = plt.subplot(211)
+    ax1.plot(range(len(train_loss_log)), train_loss_log)
+    ax1.set_ylim(0, 100)
+    ax2 = plt.subplot(212)
+    ax2.plot(range(len(eval_loss_log)), eval_loss_log)
     plt.show()
 
 if __name__ == "__main__":
