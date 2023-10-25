@@ -15,6 +15,7 @@ function:
     angularLoss - calculate accumulated angular loss in degrees
     illuminate - Linearize, illuminate, map to RGB and gamma correct
     L2sRGB - Map linear chromaticity space to sRGB chromaticity space
+    to_rgb - Map input to rgb chromaticity space
 
 class:
     MaxResize - scale input resizing longer size to max
@@ -106,6 +107,22 @@ def L2sRGB(linImg):
     linImg[low_mask] *= 12.92
     linImg[high_mask] = 1.055 * linImg[high_mask]**(1/2.4) - 0.055
     return linImg
+
+def to_rgb(inputs):
+    '''
+    Map input to rgb chromaticity space (r,g,b in [0,1] such that r+g+b = 1)
+
+    Parameter:
+        input(tensor) - input in arbitrary chromaticity space
+
+    Return:
+        input(tensor) - input mapped to rgb chromaticity space
+    '''
+    num_inputs = inputs.shape[0]
+    if num_inputs == 1: return inputs / torch.sum(inputs)
+    for idx in range(num_inputs):
+        inputs[idx] = inputs / torch.sum(inputs)
+    return inputs
 
 #################
 ### Transform ### 
