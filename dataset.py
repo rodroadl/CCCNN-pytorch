@@ -62,21 +62,19 @@ class CustomDataset(Dataset):
         # transform
         if self.transform: image = self.transform(image)
 
-        if self.image_space == 'log': # [0,1]->[-infty, 0]
+        if self.image_space == 'log': # [0,1]->[-infty, 0)
             image = torch.log(image+eps)
         elif self.image_space == 'expandedLog': # [0,1]->[0, ~9.7]
             image *= saturation_lvl
-            # image[image != 0] = torch.log(image[image != 0])
             image = torch.where(image != 0, torch.log(image), 0.)
             if torch.isnan(image).any():
                 print("nan happened after log")
                 raise SystemExit
 
-        if self.label_space == 'log': # ->[-infty, 0]
+        if self.label_space == 'log': # ->[-infty, 0)
             label = torch.log(label+eps)
         elif self.label_space == 'expandedLog': # ->[0, ~9.7]
             label *= saturation_lvl
-            # label[label != 0] = torch.log(label[label != 0])
             label = torch.where(label != 0, torch.log(label), 0.)
             label = torch.clamp(label, 0., saturation_lvl)
 
