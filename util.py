@@ -121,7 +121,7 @@ def to_rgb(inputs):
     num_inputs = inputs.shape[0]
     if num_inputs == 1: return inputs / torch.sum(inputs)
     for idx in range(num_inputs):
-        inputs[idx] = inputs / torch.sum(inputs)
+        inputs[idx] = inputs / torch.sum(inputs[idx])
     return inputs
 
 #################
