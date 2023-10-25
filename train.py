@@ -2,7 +2,7 @@
 train.py
 
 Last edited by: GunGyeom James Kim
-Last edited at: Oct 20th, 2023
+Last edited at: Oct 24th, 2023
 CS 7180: Advnaced Perception
 
 code for training the network
@@ -19,7 +19,6 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 import torch.backends.cudnn as cudnn
-from torchvision import transforms
 from torch.utils.data import DataLoader
 
 # custom
@@ -47,7 +46,7 @@ def main():
     parser.add_argument('--num-workers', type=int, default=os.cpu_count())
     parser.add_argument('--seed', type=int, default=123)
     args = parser.parse_args()
-    # args.outputs_dir = os.path.join(args.outputs_dir, 'x{}'.format(args.scale))
+    
     if not os.path.exists(args.outputs_dir): os.makedirs(args.outputs_dir)
 
     # set up device, instantiate the SRCNN model, set up criterion and optimizer
