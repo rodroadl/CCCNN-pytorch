@@ -65,6 +65,7 @@ def angularLoss(xs, ys):
     if xs.shape[0] == 1: 
         if torch.count_nonzero(xs[0]).item() == 0: return 180
         return math.degrees(torch.arccos(torch.nn.functional.cosine_similarity(xs,ys, dim=-1)).item())
+    
     output = 0
     for x, y in zip(xs, ys):
         if torch.count_nonzero(x).item() == 0: output += 180

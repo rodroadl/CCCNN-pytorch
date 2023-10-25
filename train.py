@@ -74,8 +74,8 @@ def main():
     ''')
 
     # configure datasets and dataloaders
-    train_dataset = CustomDataset(args.train_images_dir, args.train_labels_file, args.num_patches, args.image_space, args.label_space)
-    eval_dataset = CustomDataset(args.eval_images_dir, args.eval_labels_file, args.num_patches, args.image_space, args.label_space)
+    train_dataset = CustomDataset(args.train_images_dir, args.train_labels_file, num_patches=args.num_patches, image_space=args.image_space, label_space=args.label_space)
+    eval_dataset = CustomDataset(args.eval_images_dir, args.eval_labels_file, num_patches=args.num_patches, image_space=args.image_space, label_space=args.label_space)
     train_dataloader = DataLoader(dataset=train_dataset,
                                   batch_size=args.batch_size,
                                   shuffle=True,
@@ -108,11 +108,21 @@ def main():
                 labels = torch.flatten(labels, start_dim=0, end_dim=1)
                 inputs = inputs.to(device)
                 labels = labels.to(device)
+                if torch.isnan(inputs).any():
+                    print("nan input found")
+                    raise SystemExit
                 preds = model(inputs)
+                if torch.isnan(preds).any():
+                    print("nan input found")
+                    raise SystemExit
                 loss = criterion(preds,labels)
                 train_loss_log.append(loss.item())
                 optimizer.zero_grad()
                 loss.backward()
+                for _, param in model.named_parameters():
+                    if torch.isnan(param.grad).any():
+                        print("nan gradient found")
+                        raise SystemExit
                 optimizer.step()
                 train_pbar.update(args.batch_size)
 
