@@ -2,7 +2,7 @@
 dataset.py
 
 Last edited by: GunGyeom James Kim
-Last edited at: Oct 20th, 2023
+Last edited at: Oct 25th, 2023
 CS 7180: Advnaced Perception
 
 Custom dataset
@@ -115,10 +115,11 @@ class ReferenceDataset(Dataset):
             image(tensor)
             label(tensos)
         '''
+        name = self.images[idx]
         image = read_16bit_png(os.path.join(self.images_dir,self.images[idx]))
-        label = torch.tensor(self.labels.iloc[idx, 1:4].astype(float).values, dtype=torch.float32) 
+        label = torch.tensor(self.labels.iloc[idx, 1:4].astype(float).values, dtype=torch.float32)
         
-        return image, label
+        return image, label, name
     
     def __len__(self):
         '''
