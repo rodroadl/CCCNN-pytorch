@@ -159,7 +159,7 @@ def main():
                 best_loss = round_loss
                 best_weights = copy.deepcopy(model.state_dict())
     print('best epoch: {}, angular loss: {:.2f}'.format(best_epoch, best_loss))
-    torch.save(best_weights, os.path.join(args.outputs_dir, '{}2{}_lr{}_{:.2f}.pth'.format(args.image_space, args.label_space,args.lr, best_loss)))
+    torch.save(best_weights, os.path.join(args.outputs_dir, '{}2{}_lr{}_{:.2f}.pth'.format(args.image_space[:3], args.label_space[:3],args.lr, best_loss)))
 
     plt.figure()
     ax1 = plt.subplot(211)
