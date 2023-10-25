@@ -86,15 +86,15 @@ def main():
         preds = to_rgb(preds)
 
         mean_pred = torch.mean(preds, dim=0)
+        print("mean_pred:", mean_pred)
+        print("label:", label)
         loss = angularLoss(mean_pred, label)
         losses.append(loss)
 
         # reconstruct PNG to JPG with gt/pred illumination
-        label_img = illuminate(input, label)
         pred_img = illuminate(input, mean_pred)
 
         # save the reconstructed image
-        cv2.imwrite(os.path.join(args.outputs_dir,'label_{}.jpg'.format(name)), cv2.cvtColor(label_img, cv2.COLOR_RGB2BGR))
         cv2.imwrite(os.path.join(args.outputs_dir,'pred_{}.jpg'.format(name)), cv2.cvtColor(pred_img, cv2.COLOR_RGB2BGR))
 
     # calculate stats

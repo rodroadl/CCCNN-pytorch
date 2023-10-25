@@ -63,7 +63,8 @@ def angularLoss(xs, ys):
     Return:
         output(float) - accumulated angular loss in degrees
     '''
-    if xs.shape[0] == 1: 
+    if xs.shape[0] == 1:
+        print("angular loss - xs[0], ys[0]:", xs[0], ys[0])
         if torch.count_nonzero(xs[0]).item() == 0: return 180
         return math.degrees(torch.arccos(torch.nn.functional.cosine_similarity(xs,ys, dim=-1)).item())
     
@@ -113,15 +114,17 @@ def to_rgb(inputs):
     Map input to rgb chromaticity space (r,g,b in [0,1] such that r+g+b = 1)
 
     Parameter:
-        input(tensor) - input in arbitrary chromaticity space
+        input(tensor) - num_patches x 3, input in arbitrary chromaticity space
 
     Return:
         input(tensor) - input mapped to rgb chromaticity space
     '''
-    num_inputs = inputs.shape[0]
-    if num_inputs == 1: return inputs[0] / torch.sum(inputs[0])
-    for idx in range(num_inputs):
+    num_patches = inputs.shape[0]
+    if num_patches == 1: return inputs[0] / torch.sum(inputs[0])
+    for idx in range(num_patches):
+        print("before norm:", inputs[idx])
         inputs[idx] = inputs[idx] / torch.sum(inputs[idx])
+        print("after norm:", inputs[idx])
     return inputs
 
 #################
