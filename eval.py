@@ -86,9 +86,9 @@ def main():
         preds = to_rgb(preds)
 
         mean_pred = torch.mean(preds, dim=0)
-        print("mean_pred:", mean_pred)
-        print("label:", label)
-        loss = angularLoss(mean_pred, label)
+        # print("mean_pred:", mean_pred)
+        # print("label:", label)
+        loss = angularLoss(mean_pred, label, singleton=True)
         losses.append(loss)
 
         # reconstruct PNG to JPG with gt/pred illumination

@@ -52,7 +52,7 @@ def read_16bit_png(file):
     data = read_file(file)
     return torch.ops.image.decode_png(data, 0, True)
 
-def angularLoss(xs, ys):
+def angularLoss(xs, ys, singleton=False):
     '''
     Return accumulated angular loss in degrees
 
@@ -63,9 +63,7 @@ def angularLoss(xs, ys):
     Return:
         output(float) - accumulated angular loss in degrees
     '''
-    print(xs.shape)
-    if xs.shape[0] == 1:
-        print("angular loss - xs[0], ys[0]:", xs[0], ys[0])
+    if singleton:
         if torch.count_nonzero(xs[0]).item() == 0: return 180
         return math.degrees(torch.arccos(torch.nn.functional.cosine_similarity(xs,ys, dim=-1)).item())
     
