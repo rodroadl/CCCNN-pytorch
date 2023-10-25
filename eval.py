@@ -73,7 +73,7 @@ def main():
 
         with torch.no_grad(): preds = model(inputs)
 
-        if args.label_sapce == "log": # [-infty, 0)
+        if args.label_space == "log": # [-infty, 0)
             eps = 1e-7
             preds = torch.exp(label-eps)
             if torch.isnan(preds).any():
