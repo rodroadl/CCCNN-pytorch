@@ -108,7 +108,7 @@ def main():
                 inputs = inputs.to(device)
                 labels = labels.to(device)
                 preds = model(inputs)
-                
+
                 if args.label_space == "expandedLog":
                     # [0, ~11.3] -> [0, 65535]
                     preds = torch.where(preds != 0, torch.exp(preds), 0)
