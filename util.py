@@ -121,7 +121,7 @@ def to_rgb(inputs):
     num_patches = inputs.shape[0]
     if num_patches == 1: return inputs[0] / torch.sum(inputs[0])
     for idx in range(num_patches):
-        inputs[idx] = inputs[idx] / torch.sum(inputs[idx])
+        inputs[idx] = inputs[idx].clone() / torch.sum(inputs[idx])
     return inputs
 
 #################
