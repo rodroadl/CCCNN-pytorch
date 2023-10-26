@@ -24,7 +24,7 @@ from torch.utils.data import DataLoader
 # custom
 from model import CCCNN
 from dataset import CustomDataset
-from util import angularLoss
+from util import angularLoss, to_rgb
 
 def main():
     '''
@@ -103,31 +103,25 @@ def main():
 
             for batch in train_dataloader:
                 inputs, labels = batch
-                if torch.isnan(inputs).any():
-                    print("nan inputs from batch")
-                    raise SystemExit
                 inputs = torch.flatten(inputs, start_dim=0, end_dim=1) #[batch size, num_patches, ...] -> [batch size * num_patches, ...] / NOTE: optimize?
                 labels = torch.flatten(labels, start_dim=0, end_dim=1)
-                if torch.isnan(inputs).any():
-                    print("nan happened after flatten")
-                    raise SystemExit
                 inputs = inputs.to(device)
                 labels = labels.to(device)
-                if torch.isnan(inputs).any():
-                    print("nan happened after .to(device)")
-                    raise SystemExit
                 preds = model(inputs)
-                if torch.isnan(preds).any():
-                    print("nan preds found")
-                    raise SystemExit
+                
+                if args.label_space == "expandedLog":
+                    # [0, ~11.3] -> [0, 65535]
+                    preds = torch.where(preds != 0, torch.exp(preds), 0)
+                    labels = torch.where(labels != 0, torch.exp(labels), 0) 
+
+                    # [0, 65535] -> [0, 1] s.t. r+g+b = 1
+                    preds = to_rgb(preds)
+                    labels = to_rgb(labels) 
+
                 loss = criterion(preds,labels)
                 train_loss_log.append(loss.item())
                 optimizer.zero_grad()
                 loss.backward()
-                for _, param in model.named_parameters():
-                    if torch.isnan(param.grad).any():
-                        print("nan gradient found")
-                        raise SystemExit
                 optimizer.step()
                 train_pbar.update(args.batch_size)
 
@@ -144,7 +138,18 @@ def main():
                 num_patches += inputs.shape[0]
                 inputs = inputs.to(device)
                 labels = labels.to(device)
+
                 with torch.no_grad(): preds = model(inputs)
+
+                if args.label_space == "expandedLog":
+                    # [0, ~11.3] -> [0, 65535]
+                    preds = torch.where(preds != 0, torch.exp(preds), 0)
+                    labels = torch.where(labels != 0, torch.exp(labels), 0) 
+
+                    # [0, 65535] -> [0, 1] s.t. r+g+b = 1
+                    preds = to_rgb(preds)
+                    labels = to_rgb(labels) 
+
                 batch_loss = angularLoss(preds, labels)
                 round_loss += batch_loss
                 eval_pbar.update(args.batch_size)

@@ -53,31 +53,27 @@ class CustomDataset(Dataset):
         '''
         image = read_16bit_png(os.path.join(self.images_dir,self.images[idx]))
         label = torch.tensor(self.labels.iloc[idx, 1:4].astype(float).values, dtype=torch.float32) 
-        if torch.isnan(image).any():
-            print("nan image found")
-            raise SystemExit
+
         # find saturation level for expanded log space
-        if self.image_space == 'expandedLog' or self.label_space == 'expandedLog': saturation_lvl = torch.max(image)
+        if self.image_space == 'expandedLog' or self.label_space == 'expandedLog': expansion = 65535
         else: eps = 1e-7
+
         # transform
         if self.transform: image = self.transform(image)
 
         if self.image_space == 'log': # [0,1]->[-infty, 0)
             image = torch.log(image+eps)
-        elif self.image_space == 'expandedLog': # [0,1]->[0, ~9.7]
-            image *= saturation_lvl # ->  65535 
+        elif self.image_space == 'expandedLog': # [0,1]->[0, ~11.3]
+            image *= expansion 
             image = torch.where(image != 0, torch.log(image), 0.)
-            if torch.isnan(image).any():
-                print("nan happened after log")
-                raise SystemExit
-        # try log( 1 + 1.7*x )
+
 
         if self.label_space == 'log': # ->[-infty, 0)
             label = torch.log(label+eps)
         elif self.label_space == 'expandedLog': # ->[0, ~9.7]
-            label *= saturation_lvl
+            label *= expansion
             label = torch.where(label != 0, torch.log(label), 0.)
-            label = torch.clamp(label, 0., saturation_lvl)
+            label = torch.clamp(label, 0., expansion)
 
         return image, torch.stack([label] * image.shape[0], dim=0)
     
